@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui">
+    <ribbon>
+        <tabs>
+            <tab id="CustomTab" label="GiraGiT">
+                <group id="FunctionsGroup" label="Функции">
+					<button id="Function1" image="Numbers_to_letters" label="Цифры в текст" size="large" onAction="CallInsertFormula" />
+                    <button id="Function2" image="Excel_icon_green_yellow" label="Сравнение данных" size="large" onAction="CallDataReconciliation" />
+					<button id="Function3" image="All_signs_after_the_comma" label="Показать все знаки после запятой" size="large" onAction="CallAll_signs_after_the_comma" />
+					<button id="Function4" image="Automatic_height_adjustment" label="Выставить высоту строк" size="large" onAction="CallAutomatic_height_adjustment" />
+					<button id="Function5" image="InsertRowsColumns" label="Вставить строку/столбец" size="large" onAction="CallInsertRowsColumns" />
+                </group>
+            </tab>
+        </tabs>
+    </ribbon>
+</customUI>
