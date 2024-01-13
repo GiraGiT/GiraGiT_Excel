@@ -134,6 +134,9 @@ Sub InsertFormula()
     ' ‘ормирование строки формулы
     формула = "=NumToText(" & первое«начение.Address & "," & режим & ")"
     
+    ' »зменение формата активной €чейки на "ќбщий"
+    ActiveCell.NumberFormat = "General"
+    
     ' ¬ставка формулы в активную €чейку
     ActiveCell.Formula = формула
 End Sub
