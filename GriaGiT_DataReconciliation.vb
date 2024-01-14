@@ -106,9 +106,9 @@ For Each cell1 In rng1
                 If Levenshtein(cell1.Value, cell2.Value) <= threshold Then
                     noMatch = False
                     ' Add a comment with file names and matched values
-                    cell1.AddComment Text:="File name 1: " & fileName1 & vbCrLf & _
-                                        "File name 2: " & fileName2 & vbCrLf & _
-                                        vbCrLf & "Matched values: " & vbCrLf & cell1.Value & vbCrLf & cell2.Value
+                    cell1.AddComment Text:="Имя файла 1: " & fileName1 & vbCrLf & _
+                                        "Имя файла 2: " & fileName2 & vbCrLf & _
+                                        vbCrLf & "Различия: " & vbCrLf & cell1.Value & vbCrLf & cell2.Value
                     ' Set comment size
                     cell1.Comment.Shape.Width = 500
                     cell1.Comment.Shape.Height = 100
