@@ -66,11 +66,11 @@ Sub DataReconciliation()
     fileName1 = rng1.Parent.Parent.Name
     fileName2 = rng2.Parent.Parent.Name
 
-    ' Clear existing formats and comments
-    rng1.ClearFormats
-    rng1.ClearComments
-    'rng2.ClearFormats
-    'rng2.ClearComments
+    ' Clear fill and comments
+    With rng1
+        .Interior.Color = xlNone
+        .ClearComments
+    End With
 
     ' Create copies of ranges
     Dim rng1Copy As Range, rng2Copy As Range
@@ -134,4 +134,3 @@ End Sub
 Sub CallDataReconciliation(control As IRibbonControl)
     Call DataReconciliation
 End Sub
-
