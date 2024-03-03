@@ -1,39 +1,64 @@
-Sub Automatic_height_adjustment()
-    Dim rc As Range
+Sub AdjustRowHeight()
+    Dim selectedRange As Range
+    Dim rowRange As Range
+    Dim textBox As Shape
+    Dim cellText As String
+
+    ' Отключаем обновление экрана и автоматический расчет формул
     Application.ScreenUpdating = False
-    For Each rc In Selection
-        RowHeightForContent rc
-    Next
+    Application.Calculation = xlCalculationManual
+
+    ' Получаем выделенный диапазон
+    Set selectedRange = Selection
+
+    ' Обрабатываем каждую строку в выделенном диапазоне
+    For Each rowRange In selectedRange.Rows
+        ' Создаем текстовое поле и выравниваем его по верхнему краю строки и ширине столбцов в выделенном диапазоне
+        Set textBox = ActiveSheet.Shapes.AddTextbox(msoTextOrientationHorizontal, rowRange.Left, rowRange.Top, rowRange.Width, 100)
+
+        ' Устанавливаем свойство AutoSize в msoAutoSizeShapeToFitText для автоматической подгонки размера текстового поля под текст
+        textBox.TextFrame2.AutoSize = msoAutoSizeShapeToFitText
+
+        ' Копируем значения из первого столбца выделенного диапазона в текстовое поле
+        cellText = rowRange.Cells(1, 1).Value
+        textBox.TextFrame2.TextRange.Characters.Text = cellText
+
+        ' Выравниваем нижнюю границу выделенного диапазона по нижней границе текстового поля
+        rowRange.RowHeight = textBox.Top + textBox.Height - rowRange.Top
+
+        ' Удаляем текстовое поле после использования
+        textBox.Delete
+    Next rowRange
+
+    ' Включаем обратно обновление экрана и автоматический расчет формул
     Application.ScreenUpdating = True
+    Application.Calculation = xlCalculationAutomatic
 End Sub
 
-Function RowHeightForContent(rc As Range)
-    Dim MergedR_Height As Single
-    Dim cellValue As String
-    
-    If rc.MergeCells Then
-        ' Если ячейка объединена, подгоняем высоту строки под ее содержимое
-        rc.WrapText = True ' Включаем перенос текста
-        cellValue = rc.Value
-        rc.Rows.AutoFit
-        If rc.RowHeight < 25 Then
-            ' Устанавливаем минимальную высоту строки в 25 пикселей (подстройте под нужные параметры)
-            rc.RowHeight = 25
-        End If
-    ElseIf Not Application.WorksheetFunction.CountA(rc) = 0 Then
-        ' Если ячейка не объединена и содержит данные, подгоняем высоту строки под ее содержимое
-        rc.WrapText = True ' Включаем перенос текста
-        cellValue = rc.Value
-        rc.Rows.AutoFit
-        If rc.RowHeight < 25 Then
-            ' Устанавливаем минимальную высоту строки в 25 пикселей (подстройте под нужные параметры)
-            rc.RowHeight = 25
-        End If
-    End If
-End Function
+Sub Automatic_height_adjustment()
+    Dim ws As Worksheet
+    Dim rc As Range
+    Dim maxTextHeight As Single
 
+    Set ws = ActiveSheet
+    maxTextHeight = 0
+
+    ' Проверяем, что есть выделенные ячейки
+    If Not Selection Is Nothing Then
+        For Each rc In Selection
+            If Not IsEmpty(rc) Then
+                Call AdjustRowHeight ' Вызываем функцию для подгонки высоты
+                ' Обновляем максимальную высоту текста
+                If rc.RowHeight > maxTextHeight Then
+                    maxTextHeight = rc.RowHeight
+                End If
+                ' Центрируем содержимое по вертикали
+                rc.VerticalAlignment = xlCenter
+            End If
+        Next rc
+    End If
+End Sub
 
 Sub CallAutomatic_height_adjustment(control As IRibbonControl)
     Call Automatic_height_adjustment
 End Sub
-
