@@ -18,16 +18,28 @@ Sub AdjustRowHeight()
 
         ' Устанавливаем свойство AutoSize в msoAutoSizeShapeToFitText для автоматической подгонки размера текстового поля под текст
         textBox.TextFrame2.AutoSize = msoAutoSizeShapeToFitText
+        
+        textBox.TextFrame2.MarginTop = 5
+        textBox.TextFrame2.MarginLeft = 3
+        textBox.TextFrame2.MarginRight = 3
+        textBox.TextFrame2.MarginBottom = 5
+        
 
         ' Копируем значения из первого столбца выделенного диапазона в текстовое поле
         cellText = rowRange.Cells(1, 1).Value
         textBox.TextFrame2.TextRange.Characters.Text = cellText
 
+        cellText = rowRange.Cells(1, 1).Font.Name
+        textBox.TextFrame2.TextRange.Characters.Font.Name = cellText
+ 
+        cellText = rowRange.Cells(1, 1).Font.Size
+        textBox.TextFrame2.TextRange.Characters.Font.Size = cellText
+
         ' Выравниваем нижнюю границу выделенного диапазона по нижней границе текстового поля
         rowRange.RowHeight = textBox.Top + textBox.Height - rowRange.Top
 
         ' Удаляем текстовое поле после использования
-        textBox.Delete
+        ' textBox.Delete
     Next rowRange
 
     ' Включаем обратно обновление экрана и автоматический расчет формул
@@ -58,6 +70,8 @@ Sub Automatic_height_adjustment()
         Next rc
     End If
 End Sub
+
+
 
 Sub CallAutomatic_height_adjustment(control As IRibbonControl)
     Call Automatic_height_adjustment
