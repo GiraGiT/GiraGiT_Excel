@@ -1,3 +1,34 @@
+Sub summ_or_dup_by_color()
+    Dim rng As Range
+    Dim arg As Range
+    Dim funcNum As Integer
+    Dim formula As String
+    
+    ' Пользователь выбирает диапазон
+    Set rng = Application.InputBox("Выберите диапазон", Type:=8)
+    
+    ' Пользователь выбирает функцию
+    funcNum = Application.InputBox("Выберите функцию: 1 - Сумма по цвету, 2 - Подсчет по цвету", Type:=1)
+    
+    ' Пользователь выбирает аргумент
+    Set arg = Application.InputBox("Выберите ячейку-аргумент", Type:=8)
+    
+    ' Создание формулы в зависимости от выбранной функции
+    If funcNum = 1 Then
+        formula = "=SumByColor(" & rng.Address & ", " & arg.Address & ")"
+    ElseIf funcNum = 2 Then
+        formula = "=countdup(" & rng.Address & ", " & arg.Address & ")"
+    Else
+        MsgBox "Неверный номер функции"
+        Exit Sub
+    End If
+    
+    ' Вставка формулы в активную ячейку
+    ActiveCell.formula = formula
+End Sub
+
+
+
 Function SumByColor(Cell_Range As Range, Color_Cell As Range) As Double
     Dim cell As Range
     Dim Color_By_Numbers As Double
@@ -44,3 +75,6 @@ Function countdup(rng As Range, arg As Variant) As Long
     ' Return the count
     countdup = count
 End Function
+Sub Callsumm_or_dup_by_color(control As IRibbonControl)
+    Call summ_or_dup_by_color
+End Sub
