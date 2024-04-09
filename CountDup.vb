@@ -4,22 +4,22 @@ Sub summ_or_dup_by_color()
     Dim funcNum As Integer
     Dim formula As String
     
-    ' Пользователь выбирает диапазон
+    ' Выбор пользователем диапазона
     Set rng = Application.InputBox("Выберите диапазон", Type:=8)
     
-    ' Пользователь выбирает функцию
-    funcNum = Application.InputBox("Выберите функцию: 1 - Сумма по цвету, 2 - Подсчет по цвету", Type:=1)
+    ' Выбор функции
+    funcNum = Application.InputBox("Выберите функицю: 1 - Сумма по цвету, 2 - Подчсет по цвету", Type:=1)
     
-    ' Пользователь выбирает аргумент
-    Set arg = Application.InputBox("Выберите ячейку-аргумент", Type:=8)
+    ' Выбор аргумента
+    Set arg = Application.InputBox("Выберите ячейку-аргумунт", Type:=8)
     
-    ' Создание формулы в зависимости от выбранной функции
+    ' Создание формулы в зависимости от выбора пользователя
     If funcNum = 1 Then
         formula = "=SumByColor(" & rng.Address & ", " & arg.Address & ")"
     ElseIf funcNum = 2 Then
         formula = "=countdup(" & rng.Address & ", " & arg.Address & ")"
     Else
-        MsgBox "Неверный номер функции"
+        MsgBox "Íåâåðíûé íîìåð ôóíêöèè"
         Exit Sub
     End If
     
@@ -34,10 +34,10 @@ Function SumByColor(Cell_Range As Range, Color_Cell As Range) As Double
     Dim Color_By_Numbers As Double
     Dim Target_Color As Long
     
-    ' Получаем цвет из выбранной пользователем ячейки
+    ' Ïîëó÷àåì öâåò èç âûáðàííîé ïîëüçîâàòåëåì ÿ÷åéêè
     Target_Color = Color_Cell.Interior.Color
     
-    ' Проходим по всем ячейкам в диапазоне
+    ' Ïðîõîäèì ïî âñåì ÿ÷åéêàì â äèàïàçîíå
     For Each cell In Cell_Range
         If (cell.Interior.Color = Target_Color) Then
             Color_By_Numbers = Color_By_Numbers + cell.Value
