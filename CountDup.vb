@@ -34,10 +34,10 @@ Function SumByColor(Cell_Range As Range, Color_Cell As Range) As Double
     Dim Color_By_Numbers As Double
     Dim Target_Color As Long
     
-    ' Ïîëó÷àåì öâåò èç âûáðàííîé ïîëüçîâàòåëåì ÿ÷åéêè
+    ' получаем цвет из выбранной ячейки
     Target_Color = Color_Cell.Interior.Color
     
-    ' Ïðîõîäèì ïî âñåì ÿ÷åéêàì â äèàïàçîíå
+    ' Проходим по всем ячейкам в диапазоне
     For Each cell In Cell_Range
         If (cell.Interior.Color = Target_Color) Then
             Color_By_Numbers = Color_By_Numbers + cell.Value
