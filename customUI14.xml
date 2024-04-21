@@ -9,7 +9,7 @@
 					<button id="Function3" image="All_signs_after_the_comma" label="Показать все знаки после запятой" size="large" onAction="CallAll_signs_after_the_comma" />
 					<button id="Function4" image="Automatic_height_adjustment" label="Выставить высоту строк" size="large" onAction="CallAutomatic_height_adjustment" />
 					<button id="Function5" image="InsertRowsColumns" label="Вставить строку/столбец" size="large" onAction="CallInsertRowsColumns" />
-					<button id="Function6" image="Summ_or_dup_by_color" label="Подсчет Сумма/Кол-во" size="large" onAction="Callsumm_or_dup_by_color" />
+					<button id="Function6" image="Summ_or_dup_by_color" label="Подсчет Сумма/Кол-во" size="large" onAction="CallCombineRanges" />
                 </group>
             </tab>
         </tabs>
