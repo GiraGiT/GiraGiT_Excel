@@ -3,12 +3,11 @@ Sub CombineRanges()
     Dim rangeValues As Range
     Dim criteria As Range
     Dim rangeSum As Range
-    Dim countRange As Range
-    Dim criteria2 As Range
     Dim rangeValues2 As Range
-    Dim criteria3 As Range
+    Dim criteria2 As Range
+    Dim countRange As Range
 
-    choice = InputBox("Выберите действие: введите '1' для суммирования, '2' - для подсчета, '3' - для подсчета с двумя диапазонами")
+    choice = InputBox("Выберите действие: введите '1' для суммирования, '2' - для суммирования по двум критериям, '3' - для подсчета уникальных значений")
 
     If choice = "" Then Exit Sub
 
@@ -21,21 +20,20 @@ Sub CombineRanges()
         On Error Resume Next
         Set rangeSum = Application.InputBox("Выберите диапазон для суммирования", Type:=8)
         On Error GoTo 0
-        ActiveCell.formula = "=SumIfColorAndValue(" & rangeValues.Columns(1).Address & ", " & criteria.Address & ", " & rangeSum.Columns(1).Address & ")"
+        ActiveCell.Formula = "=SumIfColorAndValue(" & rangeValues.Columns(1).Address & ", " & criteria.Address & ", " & rangeSum.Columns(1).Address & ")"
     ElseIf choice = "2" Then
-        On Error Resume Next
-        Set countRange = Application.InputBox("Выберите диапазон для подсчета", Type:=8)
-        Set criteria2 = Application.InputBox("Выберите ячейку с значением для подсчета", Type:=8)
-        On Error GoTo 0
-        ActiveCell.formula = "=CountIfColorAndValue(" & rangeValues.Columns(1).Address & ", " & criteria.Address & ", " & countRange.Columns(1).Address & ", " & criteria2.Address & ")"
+    On Error Resume Next
+    Set rangeValues2 = Application.InputBox("Выберите второй диапазон для поиска значения и цвета", Type:=8)
+    Set criteria2 = Application.InputBox("Выберите вторую ячейку с значением и цветом для поиска", Type:=8)
+    Set rangeSum = Application.InputBox("Выберите диапазон для суммирования", Type:=8)
+    On Error GoTo 0
+    If rangeValues2 Is Nothing Or criteria2 Is Nothing Or rangeSum Is Nothing Then Exit Sub
+    ActiveCell.Formula = "=SumIfColorAndValue2(" & rangeValues.Columns(1).Address & ", " & criteria.Address & ", " & rangeSum.Columns(1).Address & ", " & rangeValues2.Columns(1).Address & ", " & criteria2.Address & ")"
     ElseIf choice = "3" Then
         On Error Resume Next
-        Set countRange = Application.InputBox("Выберите первый диапазон для подсчета", Type:=8)
-        Set criteria2 = Application.InputBox("Выберите первую ячейку с значением для подсчета", Type:=8)
-        Set rangeValues2 = Application.InputBox("Выберите второй диапазон для поиска значения и цвета", Type:=8)
-        Set criteria3 = Application.InputBox("Выберите вторую ячейку с значением и цветом для поиска", Type:=8)
+        Set countRange = Application.InputBox("Выберите диапазон для подсчета уникальных значений", Type:=8)
         On Error GoTo 0
-        ActiveCell.formula = "=CountIfColorAndValue2(" & rangeValues.Columns(1).Address & ", " & criteria.Address & ", " & countRange.Columns(1).Address & ", " & criteria2.Address & ", " & rangeValues2.Columns(1).Address & ", " & criteria3.Address & ")"
+        ActiveCell.Formula = "=CountUniqueIfColorAndValue(" & rangeValues.Columns(1).Address & ", " & criteria.Address & ", " & countRange.Columns(1).Address & ")"
     End If
 End Sub
 
@@ -48,54 +46,58 @@ Function SumIfColorAndValue(rangeValues As Range, criteria As Range, rangeSum As
     color = criteria.Interior.color
 
     For i = 1 To rangeValues.Cells.count
-        If rangeValues.Cells(i).Value = criteria.Value And rangeValues.Cells(i).Interior.color = color Then
-            If IsNumeric(rangeSum.Cells(i).Value) Then
-                SumIfColorAndValue = SumIfColorAndValue + rangeSum.Cells(i).Value
+        If rangeValues.Cells(i).value = criteria.value And rangeValues.Cells(i).Interior.color = color Then
+            If IsNumeric(rangeSum.Cells(i).value) Then
+                SumIfColorAndValue = SumIfColorAndValue + rangeSum.Cells(i).value
             End If
         End If
     Next i
 End Function
 
-Function CountIfColorAndValue(rangeValues As Range, criteria As Range, countRange As Range, criteria2 As Range) As Long
-    Dim cell As Range
+
+Function SumIfColorAndValue2(rangeValues1 As Range, criteria1 As Range, rangeSum As Range, rangeValues2 As Range, criteria2 As Range) As Double
     Dim i As Long
-    Dim color As Long
-    Dim count As Long
+    Dim color1 As Long
+    Dim cellValue1 As Variant, cellValue2 As Variant
+    Dim sumValue As Variant
 
-    color = criteria.Interior.color
+    color1 = criteria1.Interior.color
 
-    For i = 1 To rangeValues.Cells.count
-        If rangeValues.Cells(i).Value = criteria.Value And rangeValues.Cells(i).Interior.color = color Then
-            If countRange.Cells(i).Value = criteria2.Value Then
-                count = count + 1
+    For i = 1 To rangeValues1.Cells.count
+        cellValue1 = rangeValues1.Cells(i).value
+        cellValue2 = rangeValues2.Cells(i).value
+        If cellValue1 = criteria1.value And rangeValues1.Cells(i).Interior.color = color1 And cellValue2 = criteria2.value Then
+            sumValue = rangeSum.Cells(i).value
+            If IsNumeric(sumValue) Then
+                SumIfColorAndValue2 = SumIfColorAndValue2 + sumValue
             End If
         End If
     Next i
-
-    CountIfColorAndValue = count
 End Function
 
-Function CountIfColorAndValue2(rangeValues As Range, criteria As Range, countRange As Range, criteria2 As Range, rangeValues2 As Range, criteria3 As Range) As Long
+
+
+Function CountUniqueIfColorAndValue(rangeValues As Range, criteria As Range, countRange As Range) As Long
     Dim cell As Range
     Dim i As Long
     Dim color As Long
-    Dim color2 As Long
-    Dim count As Long
+    Dim uniqueValues As Collection
+    Dim value As Variant
+
+    Set uniqueValues = New Collection
 
     color = criteria.Interior.color
-    color2 = criteria3.Interior.color
 
+    On Error Resume Next
     For i = 1 To rangeValues.Cells.count
-        If rangeValues.Cells(i).Value = criteria.Value And rangeValues.Cells(i).Interior.color = color Then
-            If countRange.Cells(i).Value = criteria2.Value Then
-                If rangeValues2.Cells(i).Value = criteria3.Value And rangeValues2.Cells(i).Interior.color = color2 Then
-                    count = count + 1
-                End If
-            End If
+        If rangeValues.Cells(i).value = criteria.value And rangeValues.Cells(i).Interior.color = color Then
+            value = countRange.Cells(i).value
+            uniqueValues.Add value, CStr(value)
         End If
     Next i
+    On Error GoTo 0
 
-    CountIfColorAndValue2 = count
+    CountUniqueIfColorAndValue = uniqueValues.count
 End Function
 
 
