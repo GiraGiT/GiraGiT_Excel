@@ -10,6 +10,9 @@
 					<button id="Function4" image="Automatic_height_adjustment" label="Выставить высоту строк" size="large" onAction="CallAutomatic_height_adjustment" />
 					<button id="Function5" image="InsertRowsColumns" label="Вставить строку/столбец" size="large" onAction="CallInsertRowsColumns" />
 					<button id="Function6" image="Summ_or_dup_by_color" label="Подсчет Сумма/Кол-во" size="large" onAction="CallCombineRanges" />
+                    <separator id="Separator1"/>
+                    <button id="RefreshAllFormulas" image="RefreshAllFormulas" label="Обновить все формулы в книге" size="large" onAction="CallRefreshAllFormulas" />
+                    <button id="RefreshSheetFormulas" image="RefreshSheetFormulas" label="Обновить формулы на текущем листе" size="large" onAction="CallRefreshSheetFormulas" />
                 </group>
             </tab>
         </tabs>
