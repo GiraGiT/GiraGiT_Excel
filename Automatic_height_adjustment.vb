@@ -23,10 +23,9 @@ Sub AdjustRowHeight()
         textBox.TextFrame2.MarginLeft = 3
         textBox.TextFrame2.MarginRight = 3
         textBox.TextFrame2.MarginBottom = 5
-        
 
         ' Копируем значения из первого столбца выделенного диапазона в текстовое поле
-        cellText = rowRange.Cells(1, 1).Value
+        cellText = rowRange.Cells(1, 1).value
         textBox.TextFrame2.TextRange.Characters.Text = cellText
 
         cellText = rowRange.Cells(1, 1).Font.Name
@@ -39,12 +38,11 @@ Sub AdjustRowHeight()
         rowRange.RowHeight = textBox.Top + textBox.Height - rowRange.Top
 
         ' Удаляем текстовое поле после использования
-        ' textBox.Delete
+        textBox.Delete
     Next rowRange
 
     ' Включаем обратно обновление экрана и автоматический расчет формул
     Application.ScreenUpdating = True
-    Application.Calculation = xlCalculationAutomatic
 End Sub
 
 Sub Automatic_height_adjustment()
@@ -70,8 +68,6 @@ Sub Automatic_height_adjustment()
         Next rc
     End If
 End Sub
-
-
 
 Sub CallAutomatic_height_adjustment(control As IRibbonControl)
     Call Automatic_height_adjustment

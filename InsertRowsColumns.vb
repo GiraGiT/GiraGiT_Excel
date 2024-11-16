@@ -26,8 +26,8 @@ Sub InsertRowsColumns()
         rng.Resize(count, rng.Columns.count).EntireRow.Insert
     End If
 
-    ' Обновите формулы
-    Call UpdateFormulas
+'    ' Обновите формулы
+'    Call UpdateFormulas
 
     Exit Sub ' Выходим из подпрограммы, если нет ошибок
 
@@ -37,23 +37,23 @@ ErrorHandler: ' Обработка ошибок
     End If
 End Sub
 
-Sub UpdateFormulas()
-    Dim ws As Worksheet
-    Dim rng As Range
-    Dim cell As Range
-
-    ' Пройдите по всем формулам на текущем листе
-    Set ws = ActiveSheet
-    On Error Resume Next
-    Set rng = ws.Cells.SpecialCells(xlCellTypeFormulas)
-    On Error GoTo 0
-    If Not rng Is Nothing Then
-        For Each cell In rng
-            ' Обновите формулу
-            cell.Formula = cell.Formula
-        Next cell
-    End If
-End Sub
+'Sub UpdateFormulas()
+'    Dim ws As Worksheet
+'    Dim rng As Range
+'    Dim cell As Range
+'
+'    ' Пройдите по всем формулам на текущем листе
+'    Set ws = ActiveSheet
+'    On Error Resume Next
+'    Set rng = ws.Cells.SpecialCells(xlCellTypeFormulas)
+'    On Error GoTo 0
+'    If Not rng Is Nothing Then
+'        For Each cell In rng
+'            ' Обновите формулу
+'            cell.Formula = cell.Formula
+'        Next cell
+'    End If
+'End Sub
 
 Sub CallInsertRowsColumns(control As IRibbonControl)
     On Error GoTo ErrorHandler ' Добавляем обработчик ошибок

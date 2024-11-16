@@ -37,9 +37,9 @@ Function CleanString(ByVal str As String) As String
     regex.IgnoreCase = True
     regex.Pattern = "[\s\p{P}\p{S}]"
     CleanString = regex.Replace(str, "")
-    CleanString = LCase(CleanString) ' ГЏГ°ГЁГўГҐГ¤ГҐГ­ГЁГҐ ГЄ Г­ГЁГ¦Г­ГҐГ¬Гі Г°ГҐГЈГЁГ±ГІГ°Гі
-    CleanString = Replace(CleanString, " ", "") ' Г“Г¤Г Г«ГҐГ­ГЁГҐ ГЇГ°Г®ГЎГҐГ«Г®Гў ГўГ­ГіГІГ°ГЁ Г±ГІГ°Г®ГЄГЁ
-    CleanString = Replace(CleanString, "0", "o") ' Г‡Г Г¬ГҐГ­Г  ГЇГ®ГµГ®Г¦ГЁГµ Г±ГЁГ¬ГўГ®Г«Г®Гў
+    CleanString = LCase(CleanString) ' Приведение к нижнему регистру
+    CleanString = Replace(CleanString, " ", "") ' Удаление пробелов внутри строки
+    CleanString = Replace(CleanString, "0", "o") ' Замена похожих символов
     CleanString = Replace(CleanString, "1", "i")
     CleanString = Replace(CleanString, "5", "s")
     CleanString = Replace(CleanString, "8", "b")
@@ -48,19 +48,19 @@ Function CleanString(ByVal str As String) As String
     CleanString = Replace(CleanString, "6", "g")
     CleanString = Replace(CleanString, "7", "t")
     CleanString = Replace(CleanString, "9", "g")
-    CleanString = Replace(CleanString, "Г®", "o") ' Г‡Г Г¬ГҐГ­Г  ГЄГЁГ°ГЁГ«Г«ГЁГ·ГҐГ±ГЄГЁГµ Г±ГЁГ¬ГўГ®Г«Г®Гў Г­Г  Г«Г ГІГЁГ­Г±ГЄГЁГҐ
-    CleanString = Replace(CleanString, "ГҐ", "e")
-    CleanString = Replace(CleanString, "Г ", "a")
-    CleanString = Replace(CleanString, "Г±", "c")
-    CleanString = Replace(CleanString, "Г°", "p")
-    CleanString = Replace(CleanString, "Гі", "y")
-    CleanString = Replace(CleanString, "ГЄ", "k")
-    CleanString = Replace(CleanString, "Гµ", "x")
-    CleanString = Replace(CleanString, "Гў", "b")
-    CleanString = Replace(CleanString, "Г¬", "m")
-    CleanString = Replace(CleanString, "ГІ", "t")
-    CleanString = Replace(CleanString, "Г­", "h")
-    CleanString = Replace(CleanString, "ГЈ", "g")
+    CleanString = Replace(CleanString, "о", "o") ' Замена кириллических символов на латинские
+    CleanString = Replace(CleanString, "е", "e")
+    CleanString = Replace(CleanString, "а", "a")
+    CleanString = Replace(CleanString, "с", "c")
+    CleanString = Replace(CleanString, "р", "p")
+    CleanString = Replace(CleanString, "у", "y")
+    CleanString = Replace(CleanString, "к", "k")
+    CleanString = Replace(CleanString, "х", "x")
+    CleanString = Replace(CleanString, "в", "b")
+    CleanString = Replace(CleanString, "м", "m")
+    CleanString = Replace(CleanString, "т", "t")
+    CleanString = Replace(CleanString, "н", "h")
+    CleanString = Replace(CleanString, "г", "g")
 End Function
 
 Function SimilarityPercentage(s1 As String, s2 As String) As Double
@@ -91,38 +91,38 @@ Sub DataReconciliation()
     Dim similarityThreshold As Double
     Dim mode As Variant
     
-    ' Г‡Г ГЇГ°Г®Г± Г°ГҐГ¦ГЁГ¬Г 
-    mode = Application.InputBox("Г‚Г»ГЎГҐГ°ГЁГІГҐ Г°ГҐГ¦ГЁГ¬: 1 - Г’Г®Г·Г­Г»ГҐ Г±Г®ГўГЇГ Г¤ГҐГ­ГЁГї, 2 - ГЏГ®ГЁГ±ГЄ Г°Г Г§Г«ГЁГ·ГЁГ©", Type:=1)
-    If mode = False Then Exit Sub ' ГЏГ°Г®ГўГҐГ°ГЄГ  Г­Г  Г­Г Г¦Г ГІГЁГҐ ГЄГ­Г®ГЇГЄГЁ "ГЋГІГ¬ГҐГ­Г "
+    ' Запрос режима
+    mode = Application.InputBox("Выберите режим: 1 - Точные совпадения, 2 - Поиск различий", Type:=1)
+    If mode = False Then Exit Sub ' Проверка на нажатие кнопки "Отмена"
     If mode <> 1 And mode <> 2 Then
-        MsgBox "ГЌГҐГўГҐГ°Г­Г»Г© Г°ГҐГ¦ГЁГ¬. ГЏГ®Г¦Г Г«ГіГ©Г±ГІГ , ГўГ»ГЎГҐГ°ГЁГІГҐ 1 ГЁГ«ГЁ 2."
+        MsgBox "Неверный режим. Пожалуйста, выберите 1 или 2."
         Exit Sub
     End If
     
     If mode = 2 Then
-        similarityThreshold = 0.85 ' Г“Г±ГІГ Г­Г®ГўГЁГІГҐ ГЇГ®Г°Г®ГЈГ®ГўГ®ГҐ Г§Г­Г Г·ГҐГ­ГЁГҐ Г¤Г«Гї ГЇГ°Г®Г¶ГҐГ­ГІГ­Г®ГЈГ® Г±Г®Г®ГІГ­Г®ГёГҐГ­ГЁГї Г±Г®ГўГЇГ Г¤ГҐГ­ГЁГ©
+        similarityThreshold = 0.85 ' Установите пороговое значение для процентного соотношения совпадений
     End If
     
-    ' Г‡Г ГЇГ°Г®Г± ГЇГҐГ°ГўГ®ГЈГ® Г¤ГЁГ ГЇГ Г§Г®Г­Г 
+    ' Запрос первого диапазона
     On Error Resume Next
-    Set firstRange = Application.InputBox("Г‚Г»Г¤ГҐГ«ГЁГІГҐ ГЇГҐГ°ГўГ»Г© Г¤ГЁГ ГЇГ Г§Г®Г­ ГїГ·ГҐГҐГЄ:", Type:=8)
+    Set firstRange = Application.InputBox("Выделите первый диапазон ячеек:", Type:=8)
     If firstRange Is Nothing Then Exit Sub
     
-    ' Г‡Г ГЇГ°Г®Г± ГўГІГ®Г°Г®ГЈГ® Г¤ГЁГ ГЇГ Г§Г®Г­Г 
-    Set secondRange = Application.InputBox("Г‚Г»Г¤ГҐГ«ГЁГІГҐ ГўГІГ®Г°Г®Г© Г¤ГЁГ ГЇГ Г§Г®Г­ ГїГ·ГҐГҐГЄ:", Type:=8)
+    ' Запрос второго диапазона
+    Set secondRange = Application.InputBox("Выделите второй диапазон ячеек:", Type:=8)
     If secondRange Is Nothing Then Exit Sub
     On Error GoTo 0
     
-    ' ГЏГ®Г«ГіГ·ГҐГ­ГЁГҐ ГЁГ¬ГҐГ­ ГґГ Г©Г«Г®Гў ГЁ Г«ГЁГ±ГІГ®Гў
+    ' Получение имен файлов и листов
     fileName1 = firstRange.Worksheet.Parent.Name
     sheetName1 = firstRange.Worksheet.Name
     fileName2 = secondRange.Worksheet.Parent.Name
     sheetName2 = secondRange.Worksheet.Name
     
-    ' Г€Г­ГЁГ¶ГЁГ Г«ГЁГ§Г Г¶ГЁГї ГЄГ®Г«Г«ГҐГЄГ¶ГЁГЁ Г¤Г«Гї Г®ГІГ±Г«ГҐГ¦ГЁГўГ Г­ГЁГї Г®ГЎГ°Г ГЎГ®ГІГ Г­Г­Г»Гµ ГїГ·ГҐГҐГЄ
+    ' Инициализация коллекции для отслеживания обработанных ячеек
     Set processedCells = New Collection
     
-    ' Г“Г¤Г Г«ГҐГ­ГЁГҐ Г±ГіГ№ГҐГ±ГІГўГіГѕГ№ГЁГµ ГЄГ®Г¬Г¬ГҐГ­ГІГ Г°ГЁГҐГў ГЁ Г®Г·ГЁГ±ГІГЄГ  Г§Г Г«ГЁГўГЄГЁ ГїГ·ГҐГҐГЄ ГІГ®Г«ГјГЄГ® Гў ГЇГҐГ°ГўГ®Г¬ Г¤ГЁГ ГЇГ Г§Г®Г­ГҐ
+    ' Удаление существующих комментариев и очистка заливки ячеек только в первом диапазоне
     For Each cell In firstRange
         If Not cell.Comment Is Nothing Then
             cell.Comment.Delete
@@ -130,41 +130,41 @@ Sub DataReconciliation()
         cell.Interior.ColorIndex = xlNone
     Next cell
     
-    ' ГЏГ®ГЁГ±ГЄ Г­Г ГЁГЎГ®Г«ГҐГҐ ГЇГ®ГµГ®Г¦ГЁГµ ГїГ·ГҐГҐГЄ Г± ГЁГ±ГЇГ®Г«ГјГ§Г®ГўГ Г­ГЁГҐГ¬ ГўГ»ГЎГ°Г Г­Г­Г®ГЈГ® Г°ГҐГ¦ГЁГ¬Г 
+    ' Поиск наиболее похожих ячеек с использованием выбранного режима
     For Each cell In firstRange
-        ' ГЏГ°Г®ГўГҐГ°ГЄГ , ГїГўГ«ГїГҐГІГ±Гї Г«ГЁ ГїГ·ГҐГ©ГЄГ  ГЇГҐГ°ГўГ®Г© Гў Г®ГЎГєГҐГ¤ГЁГ­ВёГ­Г­Г®Г¬ Г¤ГЁГ ГЇГ Г§Г®Г­ГҐ
+        ' Проверка, является ли ячейка первой в объединённом диапазоне
         If cell.MergeCells Then
             Set cellToComment = cell.MergeArea.Cells(1, 1)
         Else
             Set cellToComment = cell
         End If
         
-        ' ГЏГ°Г®ГЇГіГ±ГЄ Г±ГЄГ°Г»ГІГ»Гµ ГїГ·ГҐГҐГЄ
+        ' Пропуск скрытых ячеек
         If cellToComment.EntireRow.Hidden Or cellToComment.EntireColumn.Hidden Then
             GoTo NextCell
         End If
         
-        ' ГЏГ°Г®ГЇГіГ±ГЄ ГїГ·ГҐГҐГЄ, ГЄГ®ГІГ®Г°Г»ГҐ ГіГ¦ГҐ ГЎГ»Г«ГЁ Г®ГЎГ°Г ГЎГ®ГІГ Г­Г»
+        ' Пропуск ячеек, которые уже были обработаны
         On Error Resume Next
         processedCells.Add cellToComment, cellToComment.Address
         If Err.Number = 457 Then
-            ' ГџГ·ГҐГ©ГЄГ  ГіГ¦ГҐ ГЎГ»Г«Г  Г®ГЎГ°Г ГЎГ®ГІГ Г­Г 
+            ' Ячейка уже была обработана
             Err.Clear
             On Error GoTo 0
             GoTo NextCell
         End If
         On Error GoTo 0
         
-        ' Г“Г¤Г Г«ГҐГ­ГЁГҐ ГЇГ°Г®ГЎГҐГ«Г®Гў, Г§Г­Г ГЄГ®Гў ГЇГ°ГҐГЇГЁГ­Г Г­ГЁГї ГЁ Г±ГЇГҐГ¶ГЁГ Г«ГјГ­Г»Гµ Г±ГЁГ¬ГўГ®Г«Г®Гў
+        ' Удаление пробелов, знаков препинания и специальных символов
         Dim cleanedCellValue As String
         cleanedCellValue = CleanString(cell.value)
         
         If mode = 1 Then
-            ' ГђГҐГ¦ГЁГ¬ ГІГ®Г·Г­Г»Гµ Г±Г®ГўГЇГ Г¤ГҐГ­ГЁГ©
+            ' Режим точных совпадений
             Dim exactMatchFound As Boolean
             exactMatchFound = False
             For Each matchCell In secondRange
-                ' ГЏГ°Г®ГЇГіГ±ГЄ Г±ГЄГ°Г»ГІГ»Гµ ГїГ·ГҐГҐГЄ
+                ' Пропуск скрытых ячеек
                 If matchCell.EntireRow.Hidden Or matchCell.EntireColumn.Hidden Then
                     GoTo NextMatchCell
                 End If
@@ -177,20 +177,20 @@ Sub DataReconciliation()
 NextMatchCell:
             Next matchCell
             
-            ' Г‡Г Г«ГЁГўГЄГ  ГїГ·ГҐГ©ГЄГЁ Гў Г§Г ГўГЁГ±ГЁГ¬Г®Г±ГІГЁ Г®ГІ Г±Г®ГўГЇГ Г¤ГҐГ­ГЁГї
+            ' Заливка ячейки в зависимости от совпадения
             If exactMatchFound Then
-                cellToComment.Interior.color = RGB(0, 255, 0) ' Г‡ГҐГ«ВёГ­Г»Г© Г¶ГўГҐГІ Г¤Г«Гї ГІГ®Г·Г­Г®ГЈГ® Г±Г®ГўГЇГ Г¤ГҐГ­ГЁГї
+                cellToComment.Interior.color = RGB(0, 255, 0) ' Зелёный цвет для точного совпадения
             Else
-                cellToComment.Interior.color = RGB(255, 0, 0) ' ГЉГ°Г Г±Г­Г»Г© Г¶ГўГҐГІ Г¤Г«Гї ГїГ·ГҐГҐГЄ ГЎГҐГ§ Г±Г®ГўГЇГ Г¤ГҐГ­ГЁГ©
+                cellToComment.Interior.color = RGB(255, 0, 0) ' Красный цвет для ячеек без совпадений
             End If
             
         ElseIf mode = 2 Then
-            ' ГђГҐГ¦ГЁГ¬ Г Г«ГЈГ®Г°ГЁГІГ¬Г  Г‹ГҐГўГҐГ­ГёГІГҐГ©Г­Г 
+            ' Режим алгоритма Левенштейна
             minDistance = Application.WorksheetFunction.Max(Len(cleanedCellValue), Len(CleanString(secondRange.Cells(1, 1).value)))
             differences = ""
             Set bestMatch = Nothing
             For Each matchCell In secondRange
-                ' ГЏГ°Г®ГЇГіГ±ГЄ Г±ГЄГ°Г»ГІГ»Гµ ГїГ·ГҐГҐГЄ
+                ' Пропуск скрытых ячеек
                 If matchCell.EntireRow.Hidden Or matchCell.EntireColumn.Hidden Then
                     GoTo NextMatchCell2
                 End If
@@ -205,59 +205,59 @@ NextMatchCell:
 NextMatchCell2:
             Next matchCell
             
-            ' ГЏГ°Г®ГўГҐГ°ГЄГ  Г­Г  ГЇГіГ±ГІГ»ГҐ Г§Г­Г Г·ГҐГ­ГЁГї
+            ' Проверка на пустые значения
             If cell.value = "" Or bestMatch.value = "" Then
-                cellToComment.Interior.color = RGB(255, 0, 0) ' ГЉГ°Г Г±Г­Г»Г© Г¶ГўГҐГІ Г¤Г«Гї ГїГ·ГҐГҐГЄ ГЎГҐГ§ Г±Г®ГўГЇГ Г¤ГҐГ­ГЁГ©
+                cellToComment.Interior.color = RGB(255, 0, 0) ' Красный цвет для ячеек без совпадений
             Else
-                ' Г“Г¤Г Г«ГҐГ­ГЁГҐ Г±ГіГ№ГҐГ±ГІГўГіГѕГ№ГҐГЈГ® ГЄГ®Г¬Г¬ГҐГ­ГІГ Г°ГЁГї, ГҐГ±Г«ГЁ Г®Г­ ГҐГ±ГІГј
+                ' Удаление существующего комментария, если он есть
                 If Not cellToComment.Comment Is Nothing Then
                     cellToComment.Comment.Delete
                 End If
                 
-                ' Г‡Г Г«ГЁГўГЄГ  ГїГ·ГҐГ©ГЄГЁ Гў Г§Г ГўГЁГ±ГЁГ¬Г®Г±ГІГЁ Г®ГІ Г±Г®ГўГЇГ Г¤ГҐГ­ГЁГї
+                ' Заливка ячейки в зависимости от совпадения
                 If minDistance = 0 Then
-                    cellToComment.Interior.color = RGB(0, 255, 0) ' Г‡ГҐГ«ВёГ­Г»Г© Г¶ГўГҐГІ Г¤Г«Гї ГІГ®Г·Г­Г®ГЈГ® Г±Г®ГўГЇГ Г¤ГҐГ­ГЁГї
+                    cellToComment.Interior.color = RGB(0, 255, 0) ' Зелёный цвет для точного совпадения
                 ElseIf minDistance > 0 And SimilarityPercentage(cleanedCellValue, CleanString(bestMatch.value)) >= similarityThreshold Then
-                    ' Г„Г®ГЎГ ГўГ«ГҐГ­ГЁГҐ ГЄГ®Г¬Г¬ГҐГ­ГІГ Г°ГЁГї ГЄ ГїГ·ГҐГ©ГЄГҐ
+                    ' Добавление комментария к ячейке
                     If Not bestMatch Is Nothing Then
-                        cellToComment.AddComment Text:="Г€Г¬Гї ГґГ Г©Г«Г  1: " & fileName1 & " > " & sheetName1 & vbCrLf & _
-                                                    "Г€Г¬Гї ГґГ Г©Г«Г  2: " & fileName2 & " > " & sheetName2 & vbCrLf & vbCrLf & _
-                                                    "ГђГ Г§Г«ГЁГ·ГЁГї:" & vbCrLf & differences
-                        ' Г€Г§Г¬ГҐГ­ГҐГ­ГЁГҐ Г°Г Г§Г¬ГҐГ°Г®Гў Г®ГЄГ­Г  ГЄГ®Г¬Г¬ГҐГ­ГІГ Г°ГЁГї
+                        cellToComment.AddComment Text:="Имя файла 1: " & fileName1 & " > " & sheetName1 & vbCrLf & _
+                                                    "Имя файла 2: " & fileName2 & " > " & sheetName2 & vbCrLf & vbCrLf & _
+                                                    "Различия:" & vbCrLf & differences
+                        ' Изменение размеров окна комментария
                         With cellToComment.Comment.Shape
                             .Width = 500
                             .Height = 100
                         End With
                         
-                        cellToComment.Interior.color = RGB(255, 255, 0) ' Г†ВёГ«ГІГ»Г© Г¶ГўГҐГІ Г¤Г«Гї Г±Г®ГўГЇГ Г¤ГҐГ­ГЁГ©
+                        cellToComment.Interior.color = RGB(255, 255, 0) ' Жёлтый цвет для совпадений
                     Else
-                        cellToComment.Interior.color = RGB(255, 0, 0) ' ГЉГ°Г Г±Г­Г»Г© Г¶ГўГҐГІ Г¤Г«Гї ГїГ·ГҐГҐГЄ ГЎГҐГ§ Г±Г®ГўГЇГ Г¤ГҐГ­ГЁГ©
+                        cellToComment.Interior.color = RGB(255, 0, 0) ' Красный цвет для ячеек без совпадений
                     End If
                 ElseIf InStr(cleanedCellValue, CleanString(bestMatch.value)) > 0 Or InStr(CleanString(bestMatch.value), cleanedCellValue) > 0 Then
-                    ' ГЏГ°Г®ГўГҐГ°ГЄГ  Г­Г  Г·Г Г±ГІГЁГ·Г­Г®ГҐ Г±Г®ГўГЇГ Г¤ГҐГ­ГЁГҐ
-                    cellToComment.Interior.color = RGB(255, 255, 0) ' Г†ВёГ«ГІГ»Г© Г¶ГўГҐГІ Г¤Г«Гї Г·Г Г±ГІГЁГ·Г­Г»Гµ Г±Г®ГўГЇГ Г¤ГҐГ­ГЁГ©
-                    ' Г„Г®ГЎГ ГўГ«ГҐГ­ГЁГҐ ГЄГ®Г¬Г¬ГҐГ­ГІГ Г°ГЁГї ГЄ ГїГ·ГҐГ©ГЄГҐ
+                    ' Проверка на частичное совпадение
+                    cellToComment.Interior.color = RGB(255, 255, 0) ' Жёлтый цвет для частичных совпадений
+                    ' Добавление комментария к ячейке
                     If Not bestMatch Is Nothing Then
-                        cellToComment.AddComment Text:="Г€Г¬Гї ГґГ Г©Г«Г  1: " & fileName1 & " > " & sheetName1 & vbCrLf & _
-                                                    "Г€Г¬Гї ГґГ Г©Г«Г  2: " & fileName2 & " > " & sheetName2 & vbCrLf & vbCrLf & _
-                                                    "ГђГ Г§Г«ГЁГ·ГЁГї:" & vbCrLf & differences
-                        ' Г€Г§Г¬ГҐГ­ГҐГ­ГЁГҐ Г°Г Г§Г¬ГҐГ°Г®Гў Г®ГЄГ­Г  ГЄГ®Г¬Г¬ГҐГ­ГІГ Г°ГЁГї
+                        cellToComment.AddComment Text:="Имя файла 1: " & fileName1 & " > " & sheetName1 & vbCrLf & _
+                                                    "Имя файла 2: " & fileName2 & " > " & sheetName2 & vbCrLf & vbCrLf & _
+                                                    "Различия:" & vbCrLf & differences
+                        ' Изменение размеров окна комментария
                         With cellToComment.Comment.Shape
                             .Width = 500
                             .Height = 100
                         End With
                     End If
                 Else
-                    cellToComment.Interior.color = RGB(255, 0, 0) ' ГЉГ°Г Г±Г­Г»Г© Г¶ГўГҐГІ Г¤Г«Гї ГїГ·ГҐГҐГЄ ГЎГҐГ§ Г±Г®ГўГЇГ Г¤ГҐГ­ГЁГ©
+                    cellToComment.Interior.color = RGB(255, 0, 0) ' Красный цвет для ячеек без совпадений
                 End If
             End If
         End If
         
-        ' ГЋГІГ«Г Г¤Г®Г·Г­Г®ГҐ Г±Г®Г®ГЎГ№ГҐГ­ГЁГҐ
+        ' Отладочное сообщение
         If Not cellToComment.Comment Is Nothing Then
-            Debug.Print "ГџГ·ГҐГ©ГЄГ : " & cellToComment.Address & " - ГЉГ®Г¬Г¬ГҐГ­ГІГ Г°ГЁГ©: " & cellToComment.Comment.Text
+            Debug.Print "Ячейка: " & cellToComment.Address & " - Комментарий: " & cellToComment.Comment.Text
         Else
-            Debug.Print "ГџГ·ГҐГ©ГЄГ : " & cellToComment.Address & " - ГЉГ®Г¬Г¬ГҐГ­ГІГ Г°ГЁГ© Г­ГҐ Г¤Г®ГЎГ ГўГ«ГҐГ­"
+            Debug.Print "Ячейка: " & cellToComment.Address & " - Комментарий не добавлен"
         End If
         
 NextCell:

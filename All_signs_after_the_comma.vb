@@ -7,7 +7,7 @@ Sub All_signs_after_the_comma()
 
     ' Применение пользовательского формата к выделенным ячейкам
     For Each cell In Selection
-        If IsNumeric(cell.Value) And (InStr(cell.Value, ".") > 0 Or InStr(cell.Value, ",") > 0) Then
+        If IsNumeric(cell.value) And (InStr(cell.value, ".") > 0 Or InStr(cell.value, ",") > 0) Then
             cell.NumberFormat = "0.##########################################################"
         Else
             cell.NumberFormat = "General"

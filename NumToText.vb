@@ -18,7 +18,7 @@ Public Function NumToText(chislo As Double, opc As Long) As String
             ITOG0 = СуммаOPC(chislo, opc)
         Case 2
             x2 = CDbl(Mid(chislo, InStr(1, chislo, ",") + 1))
-            utr = Str(chislo)
+            utr = str(chislo)
             utr1 = Split(utr, ".")
             drobLen = Len(utr1(1))
             itog = СуммаOPC(Int(chislo), opc)
@@ -31,7 +31,7 @@ Public Function NumToText(chislo As Double, opc As Long) As String
             ITOG0 = itog & tekst & x2 & sklon
         Case 3
             x2 = CDbl(Mid(chislo, InStr(1, chislo, ",") + 1))
-            utr = Str(chislo)
+            utr = str(chislo)
             utr1 = Split(utr, ".")
             drobLen = Len(utr1(1))    '- 2
             itog = СуммаOPC(Int(chislo), opc)
