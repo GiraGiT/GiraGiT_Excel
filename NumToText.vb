@@ -1,10 +1,9 @@
 Option Explicit
-Public Function NumToText(chislo As Double, opc As Long) As String
+Public Function NumToText(chislo As Double, Optional rod As Integer = 1) As String
     '
-    ' opc=1 Просто сумма прописью
-    ' opc=2 Сумма прописью, дробная часть числом
-    ' opc=3 Сумма прописью и дробная часть прописью
- 
+    ' Автоматическое определение целого и дробного числа
+    ' Если число целое, используется переданный аргумент для определения рода
+
     Dim drobLen As Variant, x2 As Double, utr As String, utr1, ITOG0 As String, itog As String
     Dim tekst As String, sklon As String, drobprop As String
     If chislo > 999999999999.99 Then
@@ -12,42 +11,34 @@ Public Function NumToText(chislo As Double, opc As Long) As String
     ElseIf chislo < 0 Then
         NumToText = "Аргумент отрицательный!"
     End If
-    Select Case opc
-        Case 1
-            chislo = Int(chislo)
-            ITOG0 = СуммаOPC(chislo, opc)
-        Case 2
-            x2 = CDbl(Mid(chislo, InStr(1, chislo, ",") + 1))
-            utr = str(chislo)
-            utr1 = Split(utr, ".")
-            drobLen = Len(utr1(1))
-            itog = СуммаOPC(Int(chislo), opc)
-            If Right(Int(chislo), 1) = "1" Then
-                tekst = tekst & " целая "
-            Else
-                tekst = tekst & " целых "
-            End If
-            sklon = drobnaya(x2, drobLen)
-            ITOG0 = itog & tekst & x2 & sklon
-        Case 3
-            x2 = CDbl(Mid(chislo, InStr(1, chislo, ",") + 1))
-            utr = str(chislo)
-            utr1 = Split(utr, ".")
-            drobLen = Len(utr1(1))    '- 2
-            itog = СуммаOPC(Int(chislo), opc)
-            drobprop = СуммаOPC(Int(x2), opc)
-            If Right(Int(chislo), 1) = "1" Then
-                tekst = tekst & " целая "
-            Else
-                tekst = tekst & " целых "
-            End If
-            sklon = drobnaya(x2, drobLen)
-            ITOG0 = itog & tekst & drobprop & sklon
-    End Select
-    NumToText = ITOG0
+
+    ' Проверка на наличие дробной части
+    If chislo = Int(chislo) Then
+        ' Целое число
+        chislo = Int(chislo)
+        ITOG0 = СуммаOPC(chislo, 1, rod)
+    Else
+        ' Дробное число
+        x2 = CDbl(Mid(chislo, InStr(1, chislo, ",") + 1))
+        utr = str(chislo)
+        utr1 = Split(utr, ".")
+        drobLen = Len(utr1(1))
+        itog = СуммаOPC(Int(chislo), 3, 1) ' Мужской род используется по умолчанию для дробной части
+        drobprop = СуммаOPC(Int(x2), 3, 1) ' Мужской род используется по умолчанию для дробной части
+        If Right(Int(chislo), 1) = "1" Then
+            tekst = tekst & " целая "
+        Else
+            tekst = tekst & " целых "
+        End If
+        sklon = drobnaya(x2, drobLen)
+        ITOG0 = itog & tekst & drobprop & sklon
+    End If
+
+    ' Преобразование первой буквы в заглавную
+    NumToText = UCase(Left(ITOG0, 1)) & Mid(ITOG0, 2)
 End Function
- 
-Public Function СуммаOPC(x As Double, opc As Long) As String
+
+Public Function СуммаOPC(x As Double, opc As Long, rod As Integer) As String
     Dim y(1 To 4) As Integer, i1 As Byte
     Dim Text(1 To 4) As String, i2 As Byte, y1 As Byte, y2 As Byte, _
             y3 As Byte, Text0 As String, text1 As String, text2 As String, Text3 As String, _
@@ -69,14 +60,14 @@ Public Function СуммаOPC(x As Double, opc As Long) As String
                     "тринадцать ", "четырнадцать ", "пятнадцать ", "шестнадцать ", _
                     "семнадцать ", "восемнадцать ", "девятнадцать ")
         ElseIf y2 <> 1 And i2 = 2 Then
-            Text3 = Choose(y1 + 1, "", "одна ", "две ", "три ", "четыре ", "пять ", _
+            Text3 = Choose(y1 + 1, "", IIf(rod = 2, "одна ", "один "), "две ", "три ", "четыре ", "пять ", _
                     "шесть ", "семь ", "восемь ", "девять ")
         Else
             If opc = 2 Or opc = 3 Then
                 Text3 = Choose(y1 + 1, "", "одна ", "две ", "три ", "четыре ", "пять ", _
                         "шесть ", "семь ", "восемь ", "девять ")
             Else
-                Text3 = Choose(y1 + 1, "", "один ", "два ", "три ", "четыре ", "пять ", _
+                Text3 = Choose(y1 + 1, "", IIf(rod = 2, "одна ", "один "), "два ", "три ", "четыре ", "пять ", _
                         "шесть ", "семь ", "восемь ", "девять ")
             End If
         End If
@@ -98,7 +89,7 @@ Public Function СуммаOPC(x As Double, opc As Long) As String
     End If
     СуммаOPC = Text0
 End Function
- 
+
 Public Function drobnaya(x2 As Double, drobLen As Variant) As String
     Dim x As Variant, scl As String
     x = Right(x2, 1)
@@ -116,8 +107,8 @@ End Function
 
 Sub InsertFormula()
     Dim первоеЗначение As Range
-    Dim режим As Integer
     Dim формула As String
+    Dim rod As Integer
     
     ' Выбор ячейки для первого значения
     On Error Resume Next ' Подавляем ошибку, если не выбрана ячейка
@@ -125,22 +116,25 @@ Sub InsertFormula()
     On Error GoTo 0 ' Возвращаем стандартный обработчик ошибок
     
     If первоеЗначение Is Nothing Then Exit Sub ' Если не выбрана ячейка, выходим из макроса
-    
-    ' Выбор режима работы функции
-    режим = Application.InputBox("Выберите режим работы функции (1, 2 или 3):", Type:=1)
-    
-    If режим < 1 Or режим > 3 Then Exit Sub ' Если режим не выбран или выбран неверно, выходим из макроса
-    
+
+    ' Проверка на наличие дробной части
+    If первоеЗначение.Value = Int(первоеЗначение.Value) Then
+        ' Выбор рода для прописи целых чисел
+        rod = Application.InputBox("Выберите род для прописи целых чисел: 1 - мужской, 2 - женский", Type:=1)
+        If rod < 1 Or rod > 2 Then Exit Sub ' Если род выбран неверно, выходим из макроса
+    Else
+        rod = 1 ' По умолчанию мужской род для дробных чисел
+    End If
+
     ' Формирование строки формулы
-    формула = "=NumToText(" & первоеЗначение.Address & "," & режим & ")"
+    формула = "=NumToText(" & первоеЗначение.Address & "," & rod & ")"
     
     ' Изменение формата активной ячейки на "Общий"
     ActiveCell.NumberFormat = "General"
     
     ' Вставка формулы в активную ячейку
-    ActiveCell.Formula = формула
+    ActiveCell.formula = формула
 End Sub
-
 
 Sub CallInsertFormula(control As IRibbonControl)
     Call InsertFormula
