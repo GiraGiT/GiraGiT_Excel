@@ -1,5 +1,5 @@
 Option Explicit
-Public Function NumToText(chislo As Double, Optional rod As Integer = 1) As String
+Public Function NumToText(chislo As Double, Optional rod As Integer = -1) As String
     Dim drobLen As Variant, x2 As Double, utr As String, utr1, ITOG0 As String, itog As String
     Dim tekst As String, sklon As String, drobprop As String
     
@@ -15,28 +15,39 @@ Public Function NumToText(chislo As Double, Optional rod As Integer = 1) As Stri
     If chislo = Int(chislo) Then
         ' Целое число
         chislo = Int(chislo)
+        ' Если род не указан, запрашиваем у пользователя
+        If rod = -1 Then
+            rod = Application.InputBox("Выберите род для прописи целых чисел: 1 - мужской, 2 - женский", Type:=1)
+            If rod < 1 Or rod > 2 Then
+                NumToText = "Неверно выбран род!"
+                Exit Function
+            End If
+        End If
         ITOG0 = Trim(СуммаOPC(chislo, 1, rod))
     Else
         ' Дробное число
         Dim целаяЧасть As Double, дробнаяЧасть As Double
         целаяЧасть = Int(chislo)
-        дробнаяЧасть = CDbl(Mid(chislo, InStr(1, chislo, ",") + 1))
+        дробнаяЧасть = chislo - целаяЧасть
         
-        utr = str(chislo)
-        utr1 = Split(utr, ".")
-        drobLen = Len(utr1(1))
-        
-        itog = Trim(СуммаOPC(целаяЧасть, 3, 1)) ' Мужской род для целой части
-        drobprop = Trim(СуммаOPC(Int(дробнаяЧасть), 3, 1)) ' Мужской род для дробной части
-        
-        ' Правильное склонение "целых/целая"
-        If целаяЧасть = 1 Then
-            tekst = " целая "
+        ' Замена точки на запятую
+        utr = Replace(CStr(chislo), ".", ",")
+        utr1 = Split(utr, ",")
+
+        ' Проверка наличия дробной части
+        If UBound(utr1) > 0 Then
+            drobLen = Len(utr1(1))
         Else
-            tekst = " целых "
+            drobLen = 0
         End If
         
-        sklon = drobnaya(дробнаяЧасть, drobLen)
+        itog = Trim(СуммаOPC(целаяЧасть, 3, 2)) ' Женский род по умолчанию для целой части
+        drobprop = Trim(СуммаOPC(Int(utr1(1)), 3, 1)) ' Мужской род для дробной части
+        
+        ' Склонение для целой части
+        tekst = " целая "
+        
+        sklon = drobnaya(drobLen)
         ITOG0 = Trim(itog & tekst & drobprop & " " & sklon)
     End If
 
@@ -61,19 +72,27 @@ Public Function СуммаOPC(x As Double, opc As Long, rod As Integer) As Strin
                 "пятьсот ", "шестьсот ", "семьсот ", "восемьсот ", "девятьсот ")
         text2 = Choose(y2 + 1, "", "", "двадцать ", "тридцать ", "сорок ", _
                 "пятьдесят ", "шестьдесят ", "семьдесят ", "восемьдесят ", "девяносто ")
+        
+        ' Специальная обработка для чисел 11-19
         If y2 = 1 Then
             Text3 = Choose(y1 + 1, "десять ", "одиннадцать ", "двенадцать ", _
                     "тринадцать ", "четырнадцать ", "пятнадцать ", "шестнадцать ", _
                     "семнадцать ", "восемнадцать ", "девятнадцать ")
         Else
-            If y2 <> 1 Then
-                Text3 = Choose(y1 + 1, "", IIf(i2 = 2, "одна ", "один "), "две ", "три ", "четыре ", "пять ", _
+            ' Разные варианты для разных разрядов
+            If i2 = 2 Then ' Тысячи
+                Text3 = Choose(y1 + 1, "", IIf(rod = 2, "одна ", "один "), IIf(rod = 2, "две ", "два "), "три ", "четыре ", "пять ", _
+                        "шесть ", "семь ", "восемь ", "девять ")
+            ElseIf i2 = 3 Then ' Миллионы
+                Text3 = Choose(y1 + 1, "", "один ", "два ", "три ", "четыре ", "пять ", _
                         "шесть ", "семь ", "восемь ", "девять ")
             Else
-                Text3 = Choose(y1 + 1, "", IIf(rod = 2, "одна ", "один "), "один ", "два ", "три ", "четыре ", "пять ", _
+                Text3 = Choose(y1 + 1, "", IIf(rod = 2, "одна ", "один "), IIf(rod = 2, "две ", "два "), "три ", "четыре ", "пять ", _
                         "шесть ", "семь ", "восемь ", "девять ")
             End If
         End If
+        
+        ' Склонение наименований разрядов
         If y2 <> 1 And y1 = 1 Then
             Text4 = Choose(i2, "", "тысяча ", "миллион ", "миллиард ", "триллион ")
         ElseIf y2 <> 1 And y1 > 1 And y1 < 5 Then
@@ -83,17 +102,19 @@ Public Function СуммаOPC(x As Double, opc As Long, rod As Integer) As Strin
         Else
             Text4 = Choose(i2, "", "тысяч ", "миллионов ", "миллиардов ", "триллионов ")
         End If
+        
         Text(i2) = text1 & text2 & Text3 & Text4
     Next
+    
     If y(1) + y(2) + y(3) + y(4) + y(5) = 0 Then
         Text0 = "ноль "
     Else
         Text0 = Text(5) & Text(4) & Text(3) & Text(2) & Text(1)
     End If
-    СуммаOPC = Text0
+    СуммаOPC = Trim(Text0)
 End Function
 
-Public Function drobnaya(x2 As Double, drobLen As Variant) As String
+Public Function drobnaya(drobLen As Variant) As String
     Dim x As Variant, scl As String
     
     ' Максимальная длина - триллионные
@@ -101,7 +122,7 @@ Public Function drobnaya(x2 As Double, drobLen As Variant) As String
         drobLen = 12
     End If
     
-    x = Right(x2, 1)
+    x = Right(drobLen, 1)
     If x = 1 Then
         scl = Choose(drobLen, "десятая", "сотая", "тысячная", "десятитысячная", _
                 "стотысячная", "миллионная", "десятимиллионная", "стомиллионная", _
@@ -130,19 +151,19 @@ Sub InsertFormula()
     If первоеЗначение.value = Int(первоеЗначение.value) Then
         ' Выбор рода для прописи целых чисел
         rod = Application.InputBox("Выберите род для прописи целых чисел: 1 - мужской, 2 - женский", Type:=1)
-        If rod < 1 Or rod > 2 Then Exit Sub ' Если род выбран неверно, выходим из макроса
+        If rod < 1 Or rod > 2 Then Exit Sub ' Если род выбран неверно или нажата "Отмена", выходим из макроса
+        ' Формирование строки формулы с указанием рода
+        формула = "=NumToText(" & первоеЗначение.Address & "," & rod & ")"
     Else
-        rod = 1 ' По умолчанию мужской род для дробных чисел
+        ' Формирование строки формулы без указания рода
+        формула = "=NumToText(" & первоеЗначение.Address & ")"
     End If
-
-    ' Формирование строки формулы
-    формула = "=NumToText(" & первоеЗначение.Address & "," & rod & ")"
     
     ' Изменение формата активной ячейки на "Общий"
     ActiveCell.NumberFormat = "General"
     
     ' Вставка формулы в активную ячейку
-    ActiveCell.formula = формула
+    ActiveCell.Formula = формула
 End Sub
 
 Sub CallInsertFormula(control As IRibbonControl)
