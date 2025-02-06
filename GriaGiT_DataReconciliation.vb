@@ -1,267 +1,231 @@
-Function Levenshtein(s1 As String, s2 As String) As Integer
-    Dim i As Integer, j As Integer
-    Dim d() As Integer
-    Dim cost As Integer
-    Dim m As Integer, n As Integer
-    
-    m = Len(s1)
-    n = Len(s2)
-    ReDim d(0 To m, 0 To n)
-    
-    For i = 0 To m
-        d(i, 0) = i
-    Next i
-    
-    For j = 0 To n
-        d(0, j) = j
-    Next j
-    
-    For i = 1 To m
-        For j = 1 To n
-            If Mid(s1, i, 1) = Mid(s2, j, 1) Then
-                cost = 0
-            Else
-                cost = 1
-            End If
-            d(i, j) = Application.WorksheetFunction.Min(d(i - 1, j) + 1, d(i, j - 1) + 1, d(i - 1, j - 1) + cost)
-        Next j
-    Next i
-    
-    Levenshtein = d(m, n)
-End Function
-
+' Р¤СѓРЅРєС†РёСЏ РѕС‡РёСЃС‚РєРё Рё РЅРѕСЂРјР°Р»РёР·Р°С†РёРё СЃС‚СЂРѕРєРё
 Function CleanString(ByVal str As String) As String
+    ' РџСЂРёРІРѕРґРёРј СЃС‚СЂРѕРєСѓ Рє РІРµСЂС…РЅРµРјСѓ СЂРµРіРёСЃС‚СЂСѓ
+    str = UCase(str)
+    
+    ' Р—Р°РјРµРЅСЏРµРј Р»Р°С‚РёРЅСЃРєСѓСЋ 'c' РЅР° РєРёСЂРёР»Р»РёС‡РµСЃРєСѓСЋ 'СЃ' РґРѕ РѕС‡РёСЃС‚РєРё
+    str = Replace(str, "C", "РЎ")
+    str = Replace(str, "c", "РЎ")
+    
+    ' РќРѕСЂРјР°Р»РёР·СѓРµРј РЅР°РїРёСЃР°РЅРёРµ СЃР»РѕРІР° "РјР°СЃР»СЏРЅРЅС‹Р№/РјР°СЃР»СЏРЅС‹Р№"
+    str = Replace(str, "РњРђРЎР›РЇРќРќ", "РњРђРЎР›РЇРќ")
+    
+    ' РЈРґР°Р»СЏРµРј РІСЃРµ РїСЂРѕР±РµР»С‹ Рё Р·РЅР°РєРё РїСЂРµРїРёРЅР°РЅРёСЏ
     Dim regex As Object
     Set regex = CreateObject("VBScript.RegExp")
     regex.Global = True
-    regex.IgnoreCase = True
-    regex.Pattern = "[\s\p{P}\p{S}]"
-    CleanString = regex.Replace(str, "")
-    CleanString = LCase(CleanString) ' Приведение к нижнему регистру
-    CleanString = Replace(CleanString, " ", "") ' Удаление пробелов внутри строки
-    CleanString = Replace(CleanString, "0", "o") ' Замена похожих символов
-    CleanString = Replace(CleanString, "1", "i")
-    CleanString = Replace(CleanString, "5", "s")
-    CleanString = Replace(CleanString, "8", "b")
-    CleanString = Replace(CleanString, "3", "e")
-    CleanString = Replace(CleanString, "4", "a")
-    CleanString = Replace(CleanString, "6", "g")
-    CleanString = Replace(CleanString, "7", "t")
-    CleanString = Replace(CleanString, "9", "g")
-    CleanString = Replace(CleanString, "о", "o") ' Замена кириллических символов на латинские
-    CleanString = Replace(CleanString, "е", "e")
-    CleanString = Replace(CleanString, "а", "a")
-    CleanString = Replace(CleanString, "с", "c")
-    CleanString = Replace(CleanString, "р", "p")
-    CleanString = Replace(CleanString, "у", "y")
-    CleanString = Replace(CleanString, "к", "k")
-    CleanString = Replace(CleanString, "х", "x")
-    CleanString = Replace(CleanString, "в", "b")
-    CleanString = Replace(CleanString, "м", "m")
-    CleanString = Replace(CleanString, "т", "t")
-    CleanString = Replace(CleanString, "н", "h")
-    CleanString = Replace(CleanString, "г", "g")
+    ' РЈРґР°Р»СЏРµРј РІСЃРµ РЅРµ Р±СѓРєРІРµРЅРЅС‹Рµ Рё РЅРµ С†РёС„СЂРѕРІС‹Рµ СЃРёРјРІРѕР»С‹
+    regex.Pattern = "[^A-ZРђ-РЇ0-9]"
+    str = regex.Replace(str, "")
+    
+    ' Р—Р°РјРµРЅР° РїРѕС…РѕР¶РёС… С†РёС„СЂ РЅР° Р±СѓРєРІС‹
+    Dim replacements As Variant
+    replacements = Array( _
+        Array("0", "O"), Array("1", "I"), Array("3", "E"), Array("4", "A"), _
+        Array("5", "S"), Array("6", "G"), Array("7", "T"), Array("8", "B"), _
+        Array("9", "G"), Array("2", "Z"))
+    
+    Dim i As Integer
+    For i = 0 To UBound(replacements)
+        str = Replace(str, replacements(i)(0), replacements(i)(1))
+    Next i
+    
+    ' Р—Р°РјРµРЅР° РєРёСЂРёР»Р»РёС‡РµСЃРєРёС… Р±СѓРєРІ РЅР° Р»Р°С‚РёРЅСЃРєРёРµ Р°РЅР°Р»РѕРіРё
+    Dim cyrToLat As Variant
+    cyrToLat = Array( _
+        Array("Рђ", "A"), Array("Р’", "B"), Array("Р•", "E"), Array("Рљ", "K"), Array("Рњ", "M"), _
+        Array("Рќ", "H"), Array("Рћ", "O"), Array("Р ", "P"), Array("РЎ", "C"), Array("Рў", "T"), _
+        Array("РЈ", "Y"), Array("РҐ", "X"), Array("Р¬", ""), Array("Р«", "I"), Array("РЃ", "E"), _
+        Array("Р", "I"), Array("Р™", "J"), Array("Р”", "D"), Array("Р›", "L"), Array("Р¤", "F"), _
+        Array("Р—", "Z"), Array("Р¦", "C"), Array("Р§", "CH"), Array("РЁ", "SH"), Array("Р©", "SCH"), _
+        Array("Р“", "G"), Array("Рџ", "P"), Array("Р–", "ZH"), Array("Р®", "YU"), Array("РЇ", "YA"), _
+        Array("Р‘", "B"), Array("Р¬", ""), Array("РЄ", ""))
+    For i = 0 To UBound(cyrToLat)
+        str = Replace(str, cyrToLat(i)(0), cyrToLat(i)(1))
+    Next i
+    
+    ' Р—Р°РјРµРЅР° Р»Р°С‚РёРЅСЃРєРёС… Р±СѓРєРІ РЅР° РєРёСЂРёР»Р»РёС‡РµСЃРєРёРµ Р°РЅР°Р»РѕРіРё
+    Dim latToCyr As Variant
+    latToCyr = Array( _
+        Array("A", "Рђ"), Array("B", "Р’"), Array("E", "Р•"), Array("K", "Рљ"), Array("M", "Рњ"), _
+        Array("H", "Рќ"), Array("O", "Рћ"), Array("P", "Р "), Array("C", "РЎ"), Array("T", "Рў"), _
+        Array("Y", "РЈ"), Array("X", "РҐ"), Array("I", "Р"), Array("J", "Р™"), Array("G", "Р“"), _
+        Array("L", "Р›"), Array("D", "Р”"), Array("F", "Р¤"), Array("Z", "Р—"), Array("N", "Рќ"), _
+        Array("Q", "Рљ"), Array("S", "РЎ"), Array("V", "Р’"), Array("U", "Р®"), Array("W", "РЁ"))
+    For i = 0 To UBound(latToCyr)
+        str = Replace(str, latToCyr(i)(0), latToCyr(i)(1))
+    Next i
+    
+    CleanString = str
 End Function
 
-Function SimilarityPercentage(s1 As String, s2 As String) As Double
-    Dim maxLength As Integer
-    maxLength = Application.WorksheetFunction.Max(Len(s1), Len(s2))
-    If maxLength = 0 Then
-        SimilarityPercentage = 1
-    Else
-        SimilarityPercentage = (maxLength - Levenshtein(s1, s2)) / maxLength
+' Р¤СѓРЅРєС†РёСЏ РїРѕРёСЃРєР° РЅР°РёР±РѕР»СЊС€РµР№ РѕР±С‰РµР№ РїРѕРґСЃС‚СЂРѕРєРё
+Function LongestCommonSubstring(s1 As String, s2 As String) As String
+    Dim lengths() As Long
+    Dim maxLen As Long, endIndex As Long
+    Dim i As Long, j As Long
+    
+    ReDim lengths(Len(s1), Len(s2))
+    
+    For i = 1 To Len(s1)
+        For j = 1 To Len(s2)
+            If Mid$(s1, i, 1) = Mid$(s2, j, 1) Then
+                If i = 1 Or j = 1 Then
+                    lengths(i, j) = 1
+                Else
+                    lengths(i, j) = lengths(i - 1, j - 1) + 1
+                End If
+                If lengths(i, j) > maxLen Then
+                    maxLen = lengths(i, j)
+                    endIndex = i
+                End If
+            Else
+                lengths(i, j) = 0
+            End If
+        Next j
+    Next i
+    
+    LongestCommonSubstring = Mid$(s1, endIndex - maxLen + 1, maxLen)
+End Function
+
+' Р¤СѓРЅРєС†РёСЏ РІС‹С‡РёСЃР»РµРЅРёСЏ РїСЂРѕС†РµРЅС‚Р° СЃРѕРІРїР°РґРµРЅРёСЏ
+Function SubstringSimilarity(str1 As String, str2 As String) As Double
+    Dim s1 As String, s2 As String
+    Dim commonSub As String
+    Dim perc1 As Double, perc2 As Double
+    
+    s1 = CleanString(str1)
+    s2 = CleanString(str2)
+
+    ' Р’С‹РІРѕРґРёРј РѕС‚Р»Р°РґРѕС‡РЅСѓСЋ РёРЅС„РѕСЂРјР°С†РёСЋ
+    Debug.Print "РћСЂРёРіРёРЅР°Р»1: " & str1 & " | РћС‡РёС‰РµРЅРЅР°СЏ1: " & s1
+    Debug.Print "РћСЂРёРіРёРЅР°Р»2: " & str2 & " | РћС‡РёС‰РµРЅРЅР°СЏ2: " & s2
+    
+    If Len(s1) = 0 Or Len(s2) = 0 Then
+        SubstringSimilarity = 0
+        Exit Function
     End If
+    
+    commonSub = LongestCommonSubstring(s1, s2)
+    perc1 = Len(commonSub) / Len(s1)
+    perc2 = Len(commonSub) / Len(s2)
+    SubstringSimilarity = (perc1 + perc2) / 2
+    
+    ' Р’С‹РІРѕРґРёРј РїСЂРѕС†РµРЅС‚ СЃС…РѕР¶РµСЃС‚Рё
+    Debug.Print "РЎС…РѕР¶РµСЃС‚СЊ: " & SubstringSimilarity
 End Function
 
+' РћСЃРЅРѕРІРЅР°СЏ РїСЂРѕС†РµРґСѓСЂР° СЃСЂР°РІРЅРµРЅРёСЏ Рё РѕРєСЂР°С€РёРІР°РЅРёСЏ СЏС‡РµРµРє СЃ РґРѕР±Р°РІР»РµРЅРёРµРј РєРѕРјРјРµРЅС‚Р°СЂРёРµРІ
 Sub DataReconciliation()
-    Dim firstRange As Range
-    Dim secondRange As Range
-    Dim cell As Range
-    Dim matchCell As Range
-    Dim minDistance As Integer
-    Dim currentDistance As Integer
-    Dim bestMatch As Range
-    Dim differences As String
-    Dim fileName1 As String
-    Dim fileName2 As String
-    Dim sheetName1 As String
-    Dim sheetName2 As String
-    Dim cellToComment As Range
-    Dim processedCells As Collection
-    Dim similarityThreshold As Double
-    Dim mode As Variant
+    Dim firstRange As Range, secondRange As Range
+    Dim cell As Range, matchCell As Range
+    Dim bestSim As Double, sim As Double
+    Dim bestMatch As String, bestComment As String
+    Dim threshold As Double
+    Dim commentText As String
+    Dim fileName1 As String, sheetName1 As String, fileName2 As String, sheetName2 As String
     
-    ' Запрос режима
-    mode = Application.InputBox("Выберите режим: 1 - Точные совпадения, 2 - Поиск различий", Type:=1)
-    If mode = False Then Exit Sub ' Проверка на нажатие кнопки "Отмена"
-    If mode <> 1 And mode <> 2 Then
-        MsgBox "Неверный режим. Пожалуйста, выберите 1 или 2."
-        Exit Sub
-    End If
+    threshold = 0.5  ' РџРѕРЅРёР·РёР»Рё РїРѕСЂРѕРі СЃС…РѕР¶РµСЃС‚Рё СЃ 0.7 РґРѕ 0.5
     
-    If mode = 2 Then
-        similarityThreshold = 0.85 ' Установите пороговое значение для процентного соотношения совпадений
-    End If
-    
-    ' Запрос первого диапазона
     On Error Resume Next
-    Set firstRange = Application.InputBox("Выделите первый диапазон ячеек:", Type:=8)
+    Set firstRange = Application.InputBox("Р’С‹РґРµР»РёС‚Рµ РїРµСЂРІС‹Р№ РґРёР°РїР°Р·РѕРЅ СЏС‡РµРµРє:", Type:=8)
     If firstRange Is Nothing Then Exit Sub
-    
-    ' Запрос второго диапазона
-    Set secondRange = Application.InputBox("Выделите второй диапазон ячеек:", Type:=8)
+    Set secondRange = Application.InputBox("Р’С‹РґРµР»РёС‚Рµ РІС‚РѕСЂРѕР№ РґРёР°РїР°Р·РѕРЅ СЏС‡РµРµРє:", Type:=8)
     If secondRange Is Nothing Then Exit Sub
     On Error GoTo 0
     
-    ' Получение имен файлов и листов
+    ' РџРѕР»СѓС‡Р°РµРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ С„Р°Р№Р»Р°С… Рё Р»РёСЃС‚Р°С…
     fileName1 = firstRange.Worksheet.Parent.Name
     sheetName1 = firstRange.Worksheet.Name
     fileName2 = secondRange.Worksheet.Parent.Name
     sheetName2 = secondRange.Worksheet.Name
     
-    ' Инициализация коллекции для отслеживания обработанных ячеек
-    Set processedCells = New Collection
+    ' РћС‡РёС‰Р°РµРј РїСЂРµРґС‹РґСѓС‰РµРµ С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ Рё РєРѕРјРјРµРЅС‚Р°СЂРёРё
+    firstRange.Interior.ColorIndex = xlNone
+    firstRange.ClearComments
     
-    ' Удаление существующих комментариев и очистка заливки ячеек только в первом диапазоне
     For Each cell In firstRange
-        If Not cell.Comment Is Nothing Then
-            cell.Comment.Delete
-        End If
-        cell.Interior.ColorIndex = xlNone
-    Next cell
-    
-    ' Поиск наиболее похожих ячеек с использованием выбранного режима
-    For Each cell In firstRange
-        ' Проверка, является ли ячейка первой в объединённом диапазоне
         If cell.MergeCells Then
-            Set cellToComment = cell.MergeArea.Cells(1, 1)
-        Else
-            Set cellToComment = cell
+            Set cell = cell.MergeArea.Cells(1, 1)
         End If
+        If cell.EntireRow.Hidden Or cell.EntireColumn.Hidden Then GoTo NextCell
         
-        ' Пропуск скрытых ячеек
-        If cellToComment.EntireRow.Hidden Or cellToComment.EntireColumn.Hidden Then
-            GoTo NextCell
-        End If
+        bestSim = 0
+        bestMatch = ""
+        bestComment = ""
         
-        ' Пропуск ячеек, которые уже были обработаны
-        On Error Resume Next
-        processedCells.Add cellToComment, cellToComment.Address
-        If Err.Number = 457 Then
-            ' Ячейка уже была обработана
-            Err.Clear
-            On Error GoTo 0
-            GoTo NextCell
-        End If
-        On Error GoTo 0
+        For Each matchCell In secondRange
+            If matchCell.EntireRow.Hidden Or matchCell.EntireColumn.Hidden Then GoTo NextMatch
+            sim = SubstringSimilarity(cell.Text, matchCell.Text)
+            If sim > bestSim Then
+                bestSim = sim
+                bestMatch = matchCell.Text
+                bestComment = "РРјСЏ С„Р°Р№Р»Р° РїРµСЂРІРѕРіРѕ РґРёР°РїР°Р·РѕРЅР°: " & fileName1 & " > Р›РёСЃС‚: " & sheetName1 & vbCrLf & _
+                              "РРјСЏ С„Р°Р№Р»Р° РІС‚РѕСЂРѕРіРѕ РґРёР°РїР°Р·РѕРЅР°: " & fileName2 & " > Р›РёСЃС‚: " & sheetName2 & vbCrLf & _
+                              "Р Р°Р·Р»РёС‡РёСЏ:" & vbCrLf & _
+                              "РџРµСЂРІРѕРµ Р·РЅР°С‡РµРЅРёРµ: " & cell.Text & vbCrLf & _
+                              "Р’С‚РѕСЂРѕРµ Р·РЅР°С‡РµРЅРёРµ: " & matchCell.Text
+End If
+NextMatch:
+        Next matchCell
         
-        ' Удаление пробелов, знаков препинания и специальных символов
-        Dim cleanedCellValue As String
-        cleanedCellValue = CleanString(cell.value)
-        
-        If mode = 1 Then
-            ' Режим точных совпадений
-            Dim exactMatchFound As Boolean
-            exactMatchFound = False
-            For Each matchCell In secondRange
-                ' Пропуск скрытых ячеек
-                If matchCell.EntireRow.Hidden Or matchCell.EntireColumn.Hidden Then
-                    GoTo NextMatchCell
-                End If
-                
-                If cleanedCellValue = CleanString(matchCell.value) Then
-                    exactMatchFound = True
-                    Exit For
-                End If
-                
-NextMatchCell:
-            Next matchCell
+        ' РћРєСЂР°С€РёРІР°РµРј Рё РґРѕР±Р°РІР»СЏРµРј РєРѕРјРјРµРЅС‚Р°СЂРёР№ РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё
+        If bestSim = 1 Then
+            cell.Interior.color = RGB(0, 255, 0)  ' Р—РµР»С‘РЅС‹Р№
+        ElseIf bestSim >= threshold Then
+            cell.Interior.color = RGB(255, 255, 0)  ' Р–С‘Р»С‚С‹Р№
+            commentText = fileName1 & " > " & sheetName1 & vbCrLf & _
+                          fileName2 & " > " & sheetName2 & vbCrLf & vbCrLf & _
+                          "Р Р°Р·Р»РёС‡РёСЏ:" & vbCrLf & _
+                          cell.Text & vbCrLf & _
+                          bestMatch
             
-            ' Заливка ячейки в зависимости от совпадения
-            If exactMatchFound Then
-                cellToComment.Interior.color = RGB(0, 255, 0) ' Зелёный цвет для точного совпадения
-            Else
-                cellToComment.Interior.color = RGB(255, 0, 0) ' Красный цвет для ячеек без совпадений
-            End If
-            
-        ElseIf mode = 2 Then
-            ' Режим алгоритма Левенштейна
-            minDistance = Application.WorksheetFunction.Max(Len(cleanedCellValue), Len(CleanString(secondRange.Cells(1, 1).value)))
-            differences = ""
-            Set bestMatch = Nothing
-            For Each matchCell In secondRange
-                ' Пропуск скрытых ячеек
-                If matchCell.EntireRow.Hidden Or matchCell.EntireColumn.Hidden Then
-                    GoTo NextMatchCell2
-                End If
-                
-                currentDistance = Levenshtein(cleanedCellValue, CleanString(matchCell.value))
-                If currentDistance < minDistance Then
-                    minDistance = currentDistance
-                    Set bestMatch = matchCell
-                    differences = cell.value & vbCrLf & matchCell.value
-                End If
-                
-NextMatchCell2:
-            Next matchCell
-            
-            ' Проверка на пустые значения
-            If cell.value = "" Or bestMatch.value = "" Then
-                cellToComment.Interior.color = RGB(255, 0, 0) ' Красный цвет для ячеек без совпадений
-            Else
-                ' Удаление существующего комментария, если он есть
-                If Not cellToComment.Comment Is Nothing Then
-                    cellToComment.Comment.Delete
-                End If
-                
-                ' Заливка ячейки в зависимости от совпадения
-                If minDistance = 0 Then
-                    cellToComment.Interior.color = RGB(0, 255, 0) ' Зелёный цвет для точного совпадения
-                ElseIf minDistance > 0 And SimilarityPercentage(cleanedCellValue, CleanString(bestMatch.value)) >= similarityThreshold Then
-                    ' Добавление комментария к ячейке
-                    If Not bestMatch Is Nothing Then
-                        cellToComment.AddComment Text:="Имя файла 1: " & fileName1 & " > " & sheetName1 & vbCrLf & _
-                                                    "Имя файла 2: " & fileName2 & " > " & sheetName2 & vbCrLf & vbCrLf & _
-                                                    "Различия:" & vbCrLf & differences
-                        ' Изменение размеров окна комментария
-                        With cellToComment.Comment.Shape
-                            .Width = 500
-                            .Height = 100
-                        End With
-                        
-                        cellToComment.Interior.color = RGB(255, 255, 0) ' Жёлтый цвет для совпадений
-                    Else
-                        cellToComment.Interior.color = RGB(255, 0, 0) ' Красный цвет для ячеек без совпадений
-                    End If
-                ElseIf InStr(cleanedCellValue, CleanString(bestMatch.value)) > 0 Or InStr(CleanString(bestMatch.value), cleanedCellValue) > 0 Then
-                    ' Проверка на частичное совпадение
-                    cellToComment.Interior.color = RGB(255, 255, 0) ' Жёлтый цвет для частичных совпадений
-                    ' Добавление комментария к ячейке
-                    If Not bestMatch Is Nothing Then
-                        cellToComment.AddComment Text:="Имя файла 1: " & fileName1 & " > " & sheetName1 & vbCrLf & _
-                                                    "Имя файла 2: " & fileName2 & " > " & sheetName2 & vbCrLf & vbCrLf & _
-                                                    "Различия:" & vbCrLf & differences
-                        ' Изменение размеров окна комментария
-                        With cellToComment.Comment.Shape
-                            .Width = 500
-                            .Height = 100
-                        End With
-                    End If
+            With cell
+                If .Comment Is Nothing Then
+                    .AddComment
                 Else
-                    cellToComment.Interior.color = RGB(255, 0, 0) ' Красный цвет для ячеек без совпадений
+                    .Comment.Delete
+                    .AddComment
                 End If
-            End If
-        End If
-        
-        ' Отладочное сообщение
-        If Not cellToComment.Comment Is Nothing Then
-            Debug.Print "Ячейка: " & cellToComment.Address & " - Комментарий: " & cellToComment.Comment.Text
+                .Comment.Text Text:=commentText
+            End With
+            
+            cell.Comment.Shape.TextFrame.AutoSize = True
         Else
-            Debug.Print "Ячейка: " & cellToComment.Address & " - Комментарий не добавлен"
+            cell.Interior.color = RGB(255, 0, 0)  ' РљСЂР°СЃРЅС‹Р№
         End If
-        
 NextCell:
     Next cell
+    
+    ' Р’С‹Р·С‹РІР°РµРј С„СѓРЅРєС†РёСЋ РІС‹РґРµР»РµРЅРёСЏ СЂР°Р·Р»РёС‡РёР№ РІ РєРѕРјРјРµРЅС‚Р°СЂРёСЏС…
+    HighlightDifferences
+End Sub
+
+' Р¤СѓРЅРєС†РёСЏ РІС‹РґРµР»РµРЅРёСЏ СЂР°Р·Р»РёС‡РёР№
+Sub HighlightDifferences()
+    Dim ws As Worksheet
+    Dim cell As Range
+    Dim commentText As String
+    Dim i As Integer
+    
+    ' РћР±СЂР°Р±Р°С‚С‹РІР°РµРј РІСЃРµ РєРѕРјРјРµРЅС‚Р°СЂРёРё РЅР° Р»РёСЃС‚Рµ
+    For Each ws In ThisWorkbook.Worksheets
+        For Each cell In ws.UsedRange
+            If Not cell.Comment Is Nothing Then
+                commentText = cell.Comment.Text
+                
+                ' РћР±СЂР°Р±Р°С‚С‹РІР°РµРј РєР°Р¶РґС‹Р№ СЃРёРјРІРѕР» РєРѕРјРјРµРЅС‚Р°СЂРёСЏ
+                For i = 1 To Len(commentText)
+                    ' РћРєСЂР°С€РёРІР°РµРј СЃРёРјРІРѕР» "G" РёР»Рё "C" РІ РєСЂР°СЃРЅС‹Р№ С†РІРµС‚
+                    If Mid(commentText, i, 1) = "G" Or Mid(commentText, i, 1) = "C" Then
+                        With cell.Comment.Shape.TextFrame.Characters(i, 1).Font
+                            .color = RGB(255, 0, 0)
+                        End With
+                    End If
+                Next i
+            End If
+        Next cell
+    Next ws
 End Sub
 
 Sub CallDataReconciliation(control As IRibbonControl)
