@@ -1,65 +1,56 @@
-' Р¤СѓРЅРєС†РёСЏ РѕС‡РёСЃС‚РєРё Рё РЅРѕСЂРјР°Р»РёР·Р°С†РёРё СЃС‚СЂРѕРєРё
+' Функция очистки и нормализации строки
 Function CleanString(ByVal str As String) As String
-    ' РџСЂРёРІРѕРґРёРј СЃС‚СЂРѕРєСѓ Рє РІРµСЂС…РЅРµРјСѓ СЂРµРіРёСЃС‚СЂСѓ
+    ' Приводим строку к верхнему регистру
     str = UCase(str)
     
-    ' Р—Р°РјРµРЅСЏРµРј Р»Р°С‚РёРЅСЃРєСѓСЋ 'c' РЅР° РєРёСЂРёР»Р»РёС‡РµСЃРєСѓСЋ 'СЃ' РґРѕ РѕС‡РёСЃС‚РєРё
-    str = Replace(str, "C", "РЎ")
-    str = Replace(str, "c", "РЎ")
+    ' Удаляем все пробелы и знаки препинания
+    Dim i As Integer
+    Dim result As String
+    For i = 1 To Len(str)
+        Dim ch As String
+        ch = Mid(str, i, 1)
+        If (ch >= "A" And ch <= "Z") Or (ch >= "А" And ch <= "Я") Or (ch >= "0" And ch <= "9") Then
+            result = result & ch
+        End If
+    Next i
+    str = result
     
-    ' РќРѕСЂРјР°Р»РёР·СѓРµРј РЅР°РїРёСЃР°РЅРёРµ СЃР»РѕРІР° "РјР°СЃР»СЏРЅРЅС‹Р№/РјР°СЃР»СЏРЅС‹Р№"
-    str = Replace(str, "РњРђРЎР›РЇРќРќ", "РњРђРЎР›РЇРќ")
-    
-    ' РЈРґР°Р»СЏРµРј РІСЃРµ РїСЂРѕР±РµР»С‹ Рё Р·РЅР°РєРё РїСЂРµРїРёРЅР°РЅРёСЏ
-    Dim regex As Object
-    Set regex = CreateObject("VBScript.RegExp")
-    regex.Global = True
-    ' РЈРґР°Р»СЏРµРј РІСЃРµ РЅРµ Р±СѓРєРІРµРЅРЅС‹Рµ Рё РЅРµ С†РёС„СЂРѕРІС‹Рµ СЃРёРјРІРѕР»С‹
-    regex.Pattern = "[^A-ZРђ-РЇ0-9]"
-    str = regex.Replace(str, "")
-    
-    ' Р—Р°РјРµРЅР° РїРѕС…РѕР¶РёС… С†РёС„СЂ РЅР° Р±СѓРєРІС‹
+    ' Замена символов по заданным правилам
     Dim replacements As Variant
     replacements = Array( _
         Array("0", "O"), Array("1", "I"), Array("3", "E"), Array("4", "A"), _
         Array("5", "S"), Array("6", "G"), Array("7", "T"), Array("8", "B"), _
-        Array("9", "G"), Array("2", "Z"))
+        Array("9", "G"), Array("2", "Z"), _
+        Array("C", "С"), Array("c", "С"), _
+        Array("МАСЛЯНН", "МАСЛЯН"), _
+        Array("А", "A"), Array("В", "B"), Array("Е", "E"), Array("К", "K"), Array("М", "M"), _
+        Array("Н", "H"), Array("О", "O"), Array("Р", "P"), Array("С", "C"), Array("Т", "T"), _
+        Array("У", "Y"), Array("Х", "X"), Array("Ь", ""), Array("Ы", "I"), Array("Ё", "E"), _
+        Array("И", "I"), Array("Й", "J"), Array("Д", "D"), Array("Л", "L"), Array("Ф", "F"), _
+        Array("З", "Z"), Array("Ц", "C"), Array("Ч", "CH"), Array("Ш", "SH"), Array("Щ", "SCH"), _
+        Array("Г", "G"), Array("П", "P"), Array("Ж", "ZH"), Array("Ю", "YU"), Array("Я", "YA"), _
+        Array("Б", "B"), Array("Ь", ""), Array("Ъ", ""), _
+        Array("A", "А"), Array("B", "В"), Array("E", "Е"), Array("K", "К"), Array("M", "М"), _
+        Array("H", "Н"), Array("O", "О"), Array("P", "Р"), Array("C", "С"), Array("T", "Т"), _
+        Array("Y", "У"), Array("X", "Х"), Array("I", "И"), Array("J", "Й"), Array("G", "Г"), _
+        Array("L", "Л"), Array("D", "Д"), Array("F", "Ф"), Array("Z", "З"), Array("N", "Н"), _
+        Array("Q", "К"), Array("S", "С"), Array("V", "В"), Array("U", "Ю"), Array("W", "Ш"))
     
-    Dim i As Integer
-    For i = 0 To UBound(replacements)
-        str = Replace(str, replacements(i)(0), replacements(i)(1))
-    Next i
-    
-    ' Р—Р°РјРµРЅР° РєРёСЂРёР»Р»РёС‡РµСЃРєРёС… Р±СѓРєРІ РЅР° Р»Р°С‚РёРЅСЃРєРёРµ Р°РЅР°Р»РѕРіРё
-    Dim cyrToLat As Variant
-    cyrToLat = Array( _
-        Array("Рђ", "A"), Array("Р’", "B"), Array("Р•", "E"), Array("Рљ", "K"), Array("Рњ", "M"), _
-        Array("Рќ", "H"), Array("Рћ", "O"), Array("Р ", "P"), Array("РЎ", "C"), Array("Рў", "T"), _
-        Array("РЈ", "Y"), Array("РҐ", "X"), Array("Р¬", ""), Array("Р«", "I"), Array("РЃ", "E"), _
-        Array("Р", "I"), Array("Р™", "J"), Array("Р”", "D"), Array("Р›", "L"), Array("Р¤", "F"), _
-        Array("Р—", "Z"), Array("Р¦", "C"), Array("Р§", "CH"), Array("РЁ", "SH"), Array("Р©", "SCH"), _
-        Array("Р“", "G"), Array("Рџ", "P"), Array("Р–", "ZH"), Array("Р®", "YU"), Array("РЇ", "YA"), _
-        Array("Р‘", "B"), Array("Р¬", ""), Array("РЄ", ""))
-    For i = 0 To UBound(cyrToLat)
-        str = Replace(str, cyrToLat(i)(0), cyrToLat(i)(1))
-    Next i
-    
-    ' Р—Р°РјРµРЅР° Р»Р°С‚РёРЅСЃРєРёС… Р±СѓРєРІ РЅР° РєРёСЂРёР»Р»РёС‡РµСЃРєРёРµ Р°РЅР°Р»РѕРіРё
-    Dim latToCyr As Variant
-    latToCyr = Array( _
-        Array("A", "Рђ"), Array("B", "Р’"), Array("E", "Р•"), Array("K", "Рљ"), Array("M", "Рњ"), _
-        Array("H", "Рќ"), Array("O", "Рћ"), Array("P", "Р "), Array("C", "РЎ"), Array("T", "Рў"), _
-        Array("Y", "РЈ"), Array("X", "РҐ"), Array("I", "Р"), Array("J", "Р™"), Array("G", "Р“"), _
-        Array("L", "Р›"), Array("D", "Р”"), Array("F", "Р¤"), Array("Z", "Р—"), Array("N", "Рќ"), _
-        Array("Q", "Рљ"), Array("S", "РЎ"), Array("V", "Р’"), Array("U", "Р®"), Array("W", "РЁ"))
-    For i = 0 To UBound(latToCyr)
-        str = Replace(str, latToCyr(i)(0), latToCyr(i)(1))
-    Next i
+    str = ReplaceCharacters(str, replacements)
     
     CleanString = str
 End Function
 
-' Р¤СѓРЅРєС†РёСЏ РїРѕРёСЃРєР° РЅР°РёР±РѕР»СЊС€РµР№ РѕР±С‰РµР№ РїРѕРґСЃС‚СЂРѕРєРё
+' Функция замены символов по заданным правилам
+Function ReplaceCharacters(ByVal str As String, ByVal replacements As Variant) As String
+    Dim i As Integer
+    For i = 0 To UBound(replacements)
+        str = Replace(str, replacements(i)(0), replacements(i)(1))
+    Next i
+    ReplaceCharacters = str
+End Function
+
+' Функция поиска наибольшей общей подстроки
 Function LongestCommonSubstring(s1 As String, s2 As String) As String
     Dim lengths() As Long
     Dim maxLen As Long, endIndex As Long
@@ -88,7 +79,7 @@ Function LongestCommonSubstring(s1 As String, s2 As String) As String
     LongestCommonSubstring = Mid$(s1, endIndex - maxLen + 1, maxLen)
 End Function
 
-' Р¤СѓРЅРєС†РёСЏ РІС‹С‡РёСЃР»РµРЅРёСЏ РїСЂРѕС†РµРЅС‚Р° СЃРѕРІРїР°РґРµРЅРёСЏ
+' Функция вычисления процента совпадения
 Function SubstringSimilarity(str1 As String, str2 As String) As Double
     Dim s1 As String, s2 As String
     Dim commonSub As String
@@ -97,9 +88,9 @@ Function SubstringSimilarity(str1 As String, str2 As String) As Double
     s1 = CleanString(str1)
     s2 = CleanString(str2)
 
-    ' Р’С‹РІРѕРґРёРј РѕС‚Р»Р°РґРѕС‡РЅСѓСЋ РёРЅС„РѕСЂРјР°С†РёСЋ
-    Debug.Print "РћСЂРёРіРёРЅР°Р»1: " & str1 & " | РћС‡РёС‰РµРЅРЅР°СЏ1: " & s1
-    Debug.Print "РћСЂРёРіРёРЅР°Р»2: " & str2 & " | РћС‡РёС‰РµРЅРЅР°СЏ2: " & s2
+    ' Выводим отладочную информацию
+    Debug.Print "Оригинал1: " & str1 & " | Очищенная1: " & s1
+    Debug.Print "Оригинал2: " & str2 & " | Очищенная2: " & s2
     
     If Len(s1) = 0 Or Len(s2) = 0 Then
         SubstringSimilarity = 0
@@ -111,11 +102,11 @@ Function SubstringSimilarity(str1 As String, str2 As String) As Double
     perc2 = Len(commonSub) / Len(s2)
     SubstringSimilarity = (perc1 + perc2) / 2
     
-    ' Р’С‹РІРѕРґРёРј РїСЂРѕС†РµРЅС‚ СЃС…РѕР¶РµСЃС‚Рё
-    Debug.Print "РЎС…РѕР¶РµСЃС‚СЊ: " & SubstringSimilarity
+    ' Выводим процент схожести
+    Debug.Print "Схожесть: " & SubstringSimilarity
 End Function
 
-' РћСЃРЅРѕРІРЅР°СЏ РїСЂРѕС†РµРґСѓСЂР° СЃСЂР°РІРЅРµРЅРёСЏ Рё РѕРєСЂР°С€РёРІР°РЅРёСЏ СЏС‡РµРµРє СЃ РґРѕР±Р°РІР»РµРЅРёРµРј РєРѕРјРјРµРЅС‚Р°СЂРёРµРІ
+' Основная процедура сравнения и окрашивания ячеек с добавлением комментариев
 Sub DataReconciliation()
     Dim firstRange As Range, secondRange As Range
     Dim cell As Range, matchCell As Range
@@ -125,22 +116,22 @@ Sub DataReconciliation()
     Dim commentText As String
     Dim fileName1 As String, sheetName1 As String, fileName2 As String, sheetName2 As String
     
-    threshold = 0.5  ' РџРѕРЅРёР·РёР»Рё РїРѕСЂРѕРі СЃС…РѕР¶РµСЃС‚Рё СЃ 0.7 РґРѕ 0.5
+    threshold = 0.5  ' Понизили порог схожести с 0.7 до 0.5
     
     On Error Resume Next
-    Set firstRange = Application.InputBox("Р’С‹РґРµР»РёС‚Рµ РїРµСЂРІС‹Р№ РґРёР°РїР°Р·РѕРЅ СЏС‡РµРµРє:", Type:=8)
+    Set firstRange = Application.InputBox("Выделите первый диапазон ячеек:", Type:=8)
     If firstRange Is Nothing Then Exit Sub
-    Set secondRange = Application.InputBox("Р’С‹РґРµР»РёС‚Рµ РІС‚РѕСЂРѕР№ РґРёР°РїР°Р·РѕРЅ СЏС‡РµРµРє:", Type:=8)
+    Set secondRange = Application.InputBox("Выделите второй диапазон ячеек:", Type:=8)
     If secondRange Is Nothing Then Exit Sub
     On Error GoTo 0
     
-    ' РџРѕР»СѓС‡Р°РµРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ С„Р°Р№Р»Р°С… Рё Р»РёСЃС‚Р°С…
+    ' Получаем информацию о файлах и листах
     fileName1 = firstRange.Worksheet.Parent.Name
     sheetName1 = firstRange.Worksheet.Name
     fileName2 = secondRange.Worksheet.Parent.Name
     sheetName2 = secondRange.Worksheet.Name
     
-    ' РћС‡РёС‰Р°РµРј РїСЂРµРґС‹РґСѓС‰РµРµ С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ Рё РєРѕРјРјРµРЅС‚Р°СЂРёРё
+    ' Очищаем предыдущее форматирование и комментарии
     firstRange.Interior.ColorIndex = xlNone
     firstRange.ClearComments
     
@@ -160,23 +151,23 @@ Sub DataReconciliation()
             If sim > bestSim Then
                 bestSim = sim
                 bestMatch = matchCell.Text
-                bestComment = "РРјСЏ С„Р°Р№Р»Р° РїРµСЂРІРѕРіРѕ РґРёР°РїР°Р·РѕРЅР°: " & fileName1 & " > Р›РёСЃС‚: " & sheetName1 & vbCrLf & _
-                              "РРјСЏ С„Р°Р№Р»Р° РІС‚РѕСЂРѕРіРѕ РґРёР°РїР°Р·РѕРЅР°: " & fileName2 & " > Р›РёСЃС‚: " & sheetName2 & vbCrLf & _
-                              "Р Р°Р·Р»РёС‡РёСЏ:" & vbCrLf & _
-                              "РџРµСЂРІРѕРµ Р·РЅР°С‡РµРЅРёРµ: " & cell.Text & vbCrLf & _
-                              "Р’С‚РѕСЂРѕРµ Р·РЅР°С‡РµРЅРёРµ: " & matchCell.Text
-End If
+                bestComment = "Имя файла первого диапазона: " & fileName1 & " > Лист: " & sheetName1 & vbCrLf & _
+                              "Имя файла второго диапазона: " & fileName2 & " > Лист: " & sheetName2 & vbCrLf & _
+                              "Различия:" & vbCrLf & _
+                              "Первое значение: " & cell.Text & vbCrLf & _
+                              "Второе значение: " & matchCell.Text
+            End If
 NextMatch:
         Next matchCell
         
-        ' РћРєСЂР°С€РёРІР°РµРј Рё РґРѕР±Р°РІР»СЏРµРј РєРѕРјРјРµРЅС‚Р°СЂРёР№ РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё
+        ' Окрашиваем и добавляем комментарий при необходимости
         If bestSim = 1 Then
-            cell.Interior.color = RGB(0, 255, 0)  ' Р—РµР»С‘РЅС‹Р№
+            cell.Interior.color = RGB(0, 255, 0)  ' Зелёный
         ElseIf bestSim >= threshold Then
-            cell.Interior.color = RGB(255, 255, 0)  ' Р–С‘Р»С‚С‹Р№
+            cell.Interior.color = RGB(255, 255, 0)  ' Жёлтый
             commentText = fileName1 & " > " & sheetName1 & vbCrLf & _
                           fileName2 & " > " & sheetName2 & vbCrLf & vbCrLf & _
-                          "Р Р°Р·Р»РёС‡РёСЏ:" & vbCrLf & _
+                          "Различия:" & vbCrLf & _
                           cell.Text & vbCrLf & _
                           bestMatch
             
@@ -192,31 +183,31 @@ NextMatch:
             
             cell.Comment.Shape.TextFrame.AutoSize = True
         Else
-            cell.Interior.color = RGB(255, 0, 0)  ' РљСЂР°СЃРЅС‹Р№
+            cell.Interior.color = RGB(255, 0, 0)  ' Красный
         End If
 NextCell:
     Next cell
     
-    ' Р’С‹Р·С‹РІР°РµРј С„СѓРЅРєС†РёСЋ РІС‹РґРµР»РµРЅРёСЏ СЂР°Р·Р»РёС‡РёР№ РІ РєРѕРјРјРµРЅС‚Р°СЂРёСЏС…
+    ' Вызываем функцию выделения различий в комментариях
     HighlightDifferences
 End Sub
 
-' Р¤СѓРЅРєС†РёСЏ РІС‹РґРµР»РµРЅРёСЏ СЂР°Р·Р»РёС‡РёР№
+' Функция выделения различий
 Sub HighlightDifferences()
     Dim ws As Worksheet
     Dim cell As Range
     Dim commentText As String
     Dim i As Integer
     
-    ' РћР±СЂР°Р±Р°С‚С‹РІР°РµРј РІСЃРµ РєРѕРјРјРµРЅС‚Р°СЂРёРё РЅР° Р»РёСЃС‚Рµ
+    ' Обрабатываем все комментарии на листе
     For Each ws In ThisWorkbook.Worksheets
         For Each cell In ws.UsedRange
             If Not cell.Comment Is Nothing Then
                 commentText = cell.Comment.Text
                 
-                ' РћР±СЂР°Р±Р°С‚С‹РІР°РµРј РєР°Р¶РґС‹Р№ СЃРёРјРІРѕР» РєРѕРјРјРµРЅС‚Р°СЂРёСЏ
+                ' Обрабатываем каждый символ комментария
                 For i = 1 To Len(commentText)
-                    ' РћРєСЂР°С€РёРІР°РµРј СЃРёРјРІРѕР» "G" РёР»Рё "C" РІ РєСЂР°СЃРЅС‹Р№ С†РІРµС‚
+                    ' Окрашиваем символ "G" или "C" в красный цвет
                     If Mid(commentText, i, 1) = "G" Or Mid(commentText, i, 1) = "C" Then
                         With cell.Comment.Shape.TextFrame.Characters(i, 1).Font
                             .color = RGB(255, 0, 0)
